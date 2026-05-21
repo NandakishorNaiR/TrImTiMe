@@ -2,9 +2,9 @@
 
 A production-ready barber shop booking system with concurrent user support, atomic transactions, and a Rapido-style "Book Now, Pay After Service" payment model.
 
-## 🌐 Live Demo
+## 🌐 Live Demo - https://tr-im-ti-me.vercel.app
 Frontend Hosted in Vercel
-Frontend: https://tr-im-ti-me.vercel.app/  
+Frontend: https://tr-im-ti-me.vercel.app 
 Backend Hosted in Render
 Backend API: https://trimtime-backend-sl7o.onrender.com
 
