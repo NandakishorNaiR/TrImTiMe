@@ -1,4 +1,4 @@
-# Barber Booking App
+# TrimTime Salon Booking App
 
 A production-ready barber shop booking system with concurrent user support, atomic transactions, and a Rapido-style "Book Now, Pay After Service" payment model.
 
