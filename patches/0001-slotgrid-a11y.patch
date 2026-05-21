@@ -1,0 +1,131 @@
+--- a/frontend/src/components/booking/SlotGrid.jsx
++++ b/frontend/src/components/booking/SlotGrid.jsx
+@@
+-import { minutesToTime } from "../../utils/time";
+- 
+-const SlotGrid = ({ slots = [], selected, onSelect, isToday }) => {
+-  const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1;
+- 
+-  return (
+-    <div className="grid grid-cols-3 gap-3 mt-4">
+-      {slots.map((s) => {
+-        // normalize s to a minute integer
+-        let slotMin = null;
+-        if (typeof s === 'number') slotMin = s;
+-        else if (s && typeof s === 'string' && s.includes(':')) {
+-          const [hh, mm] = s.split(':').map(Number);
+-          slotMin = hh * 60 + mm;
+-        } else if (s && typeof s === 'object') {
+-          const val = s.start || s.minute || s.m;
+-          if (typeof val === 'number') slotMin = val;
+-          else if (typeof val === 'string' && val.includes(':')) {
+-            const [hh, mm] = val.split(':').map(Number);
+-            slotMin = hh * 60 + mm;
+-          } else slotMin = Number(val);
+-        } else slotMin = Number(s);
+- 
+-        if (!Number.isFinite(slotMin) || Number.isNaN(slotMin)) return null;
+- 
+-        // keep selected slot visible and not disabled by the "too soon" rule
+-        const disabled = (isToday && slotMin <= nowMin + 10) && (selected !== slotMin);
+-        const active = selected === slotMin;
+- 
+-        return (
+-          <button
+-            key={slotMin}
+-            disabled={disabled}
+-            onClick={() => onSelect(slotMin)}
+-            className={`py-2 rounded border text-sm text-center leading-5
+-              ${disabled ? "bg-gray-100 text-gray-400" : "bg-white"}
+-              ${active ? "bg-black text-white border-black" : ""}`}
+-          >
+-            {minutesToTime(slotMin)}
+-          </button>
+-        );
+-      })}
+-    </div>
+-  );
+-};
+- 
+-export default SlotGrid;
+- 
+--- a/frontend/src/components/booking/SlotGrid.jsx
++++ b/frontend/src/components/booking/SlotGrid.jsx
+@@
+import React from "react";
+import { minutesToTime } from "../../utils/time";
+
+// Accessible single slot button extracted for clarity and tests
+const SlotButton = ({ timeMinutes, active, disabled, onSelect }) => {
+  const label = minutesToTime(timeMinutes);
+
+  const handleKey = (e) => {
+    if (disabled) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect(timeMinutes);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      role="gridcell"
+      aria-pressed={!!active}
+      aria-disabled={!!disabled}
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={handleKey}
+      onClick={() => !disabled && onSelect(timeMinutes)}
+      className={`py-2 rounded border text-sm text-center leading-5 focus:outline-none focus:ring-2 focus:ring-offset-1
+        ${disabled ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white"}
+        ${active ? "bg-black text-white border-black" : ""}`}
+    >
+      {label}
+    </button>
+  );
+};
+
+const SlotGrid = ({ slots = [], selected, onSelect, isToday }) => {
+  const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1;
+
+  const normalizedSlots = slots
+    .map((s) => {
+      if (typeof s === "number") return s;
+      if (typeof s === "string" && s.includes(":")) {
+        const [hh, mm] = s.split(":").map(Number);
+        return hh * 60 + mm;
+      }
+      if (s && typeof s === "object") {
+        const val = s.start || s.minute || s.m;
+        if (typeof val === "number") return val;
+        if (typeof val === "string" && val.includes(":")) {
+          const [hh, mm] = val.split(":").map(Number);
+          return hh * 60 + mm;
+        }
+        return Number(val);
+      }
+      return Number(s);
+    })
+    .filter((v) => Number.isFinite(v) && !Number.isNaN(v));
+
+  return (
+    <div role="grid" aria-label="Available time slots" className="grid grid-cols-3 gap-3 mt-4">
+      {normalizedSlots.map((slotMin) => {
+        const disabled = isToday && slotMin <= nowMin + 10 && selected !== slotMin;
+        const active = selected === slotMin;
+        return (
+          <SlotButton
+            key={slotMin}
+            timeMinutes={slotMin}
+            active={active}
+            disabled={disabled}
+            onSelect={onSelect}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+export default SlotGrid;
+

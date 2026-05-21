@@ -1,0 +1,52 @@
+--- a/backend/scripts/migrations/20260205-backfill-settlement.js
++++ b/backend/scripts/migrations/20260205-backfill-settlement.js
+@@
++/**
++ * Migration: backfill `settlement` object for bookings missing it and add index.
++ * Run with: node backend/scripts/migrations/20260205-backfill-settlement.js --run
++ * Dry-run default; --run to perform updates.
++ */
++
+const mongoose = require("mongoose");
+const Booking = require("../../src/models/Booking.model");
+
+const MONGO_URL = process.env.MONGO_URL || "mongodb://localhost:27017/barber";
+
+async function run({ apply = false } = {}) {
+  await mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+  console.log("Connected to DB");
+
+  // 1) Create compound index for query performance
+  try {
+    await Booking.collection.createIndex({ shopId: 1, slotStart: 1 });
+    console.log("Created index {shopId:1, slotStart:1}");
+  } catch (e) {
+    console.warn("Index create failed or already exists:", e.message);
+  }
+
+  // 2) Find bookings missing settlement and backfill conservative defaults
+  const cursor = Booking.find({ $or: [{ settlement: { $exists: false } }, { settlement: null }] }).cursor();
+  let count = 0;
+  for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+    count++;
+    console.log("Found booking missing settlement:", doc._id);
+    if (apply) {
+      const salonAmount = (doc.totalAmount || 0) - (doc.platformFee || 0);
+      const platformAmount = doc.platformFee || 0;
+      await Booking.updateOne({ _id: doc._id }, { $set: { settlement: { salonAmount, platformAmount } } });
+      console.log("Backfilled settlement for", String(doc._id));
+    }
+  }
+
+  console.log(`Scanned bookings; candidates: ${count}. apply=${apply}`);
+  await mongoose.disconnect();
+}
+
+if (require.main === module) {
+  const apply = process.argv.includes("--run");
+  run({ apply }).catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
+

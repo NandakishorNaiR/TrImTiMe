@@ -1,0 +1,6 @@
+{
+    "name": "Barber Booking",
+    "short_name": "Barber",
+    "start_url": "/",
+    "display": "standalone"
+}

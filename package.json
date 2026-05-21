@@ -1,0 +1,15 @@
+{
+    "name": "barber-booking-app",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "start": "concurrently \"npm:backend:start\" \"npm:frontend:dev\"",
+        "dev": "concurrently \"npm:backend:dev\" \"npm:frontend:dev\"",
+        "backend:start": "cd backend && npm start",
+        "backend:dev": "cd backend && npm run dev",
+        "frontend:dev": "cd frontend && npm run dev"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

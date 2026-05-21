@@ -1,0 +1,145 @@
+--- a/backend/src/controllers/booking.controller.js
++++ b/backend/src/controllers/booking.controller.js
+@@
+ exports.createBooking = async(req, res) => {
+     try {
+         const userId = req.user && req.user.id;
+         const {
+             shopId,
+             services,
+             slotStart,
+             memberName,
+             paymentId,
+             amountPaid,
+             paymentMode
+         } = req.body;
+@@
+-        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+-
+-        if (!shopId || !services || !slotStart) {
+-            return res.status(400).json({ message: "Missing fields" });
+-        }
++        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
++        // Basic runtime validation (avoid heavy deps in patch)
++        const errors = [];
++        if (!shopId) errors.push("shopId is required");
++        if (!slotStart) errors.push("slotStart is required");
++        if (!Array.isArray(services) || services.length === 0) errors.push("services must be a non-empty array");
++        if (paymentMode === "ONLINE" && (typeof amountPaid !== "number" || Number.isNaN(amountPaid))) errors.push("amountPaid must be a number for ONLINE payments");
++        if (errors.length) return res.status(422).json({ message: "Invalid input", errors });
+
+@@
+-        // 2️⃣ VERIFY PAYMENT (skip if COD)
+-        let paymentValid = true;
+-        const chosenPaymentMode = paymentMode || 'ONLINE';
+-        if (chosenPaymentMode === 'ONLINE') {
+-            paymentValid = await verifyPayment(paymentId, amountPaid);
+-            if (!paymentValid) {
+-                return res.status(402).json({ message: "Payment verification failed" });
+-            }
+-        }
+-        
+-        // 3️⃣ CREATE BOOKING SAFELY (atomic-like)
+-        const bookingData = {
+-            userId,
+-            shopId,
+-            memberName: effectiveMemberName,
+-            services,
+-            slotStart: startTime,
+-            slotEnd: endTime,
+-            payment: (chosenPaymentMode === 'ONLINE') ? {
+-                mode: "UPI",
+-                amountPaid,
+-                status: "paid",
+-                paymentId
+-            } : {
+-                mode: "COD",
+-                amountPaid: 0,
+-                status: "paid"
+-            },
+-            // new fields for settlement/accounting
+-            paymentMode: chosenPaymentMode,
+-            platformFee: PLATFORM_FEE,
+-            totalAmount: servicesTotal + PLATFORM_FEE,
+-            status: "booked"
+-        };
+-        
+-        try {
+-            const booking = await createBookingSafely(bookingData);
+- 
+-            // Reward for online payment (UPI)
+-            try { await adjustPriority(userId, +1); } catch (e) { /* non-fatal */ }
+- 
+-            return res.status(201).json({
+-                message: "Booking confirmed",
+-                bookingId: booking._id,
+-                slot: { start: booking.slotStart, end: booking.slotEnd }
+-            });
+-        } catch (err) {
+-            if (err && err.code === 'SLOT_BOOKED') {
+-                return res.status(409).json({ message: "Slot already booked" });
+-            }
+-            throw err;
+-        }
++        // 2️⃣ VERIFY PAYMENT (skip if COD) — wrapped in try to surface gateway errors clearly
++        let paymentValid = true;
++        const chosenPaymentMode = paymentMode || "ONLINE";
++        if (chosenPaymentMode === "ONLINE") {
++            try {
++                paymentValid = await verifyPayment(paymentId, amountPaid);
++            } catch (pvErr) {
++                console.error("Payment verification error", pvErr);
++                return res.status(502).json({ message: "Payment gateway error" });
++            }
++            if (!paymentValid) {
++                return res.status(402).json({ message: "Payment verification failed" });
++            }
++        }
+
++        // 3️⃣ CREATE BOOKING SAFELY (atomic-like)
++        const bookingData = {
++            userId,
++            shopId,
++            memberName: effectiveMemberName,
++            services: (Array.isArray(services) ? services : []).map(s => ({
++                name: s.name || "Service",
++                price: Number(s.price) || 0,
++                duration: Number(s.duration) || 0
++            })),
++            slotStart: startTime,
++            slotEnd: endTime,
++            payment: (chosenPaymentMode === "ONLINE") ? {
++                mode: "UPI",
++                amountPaid,
++                status: "paid",
++                paymentId
++            } : {
++                mode: "COD",
++                amountPaid: 0,
++                status: "paid"
++            },
++            // new fields for settlement/accounting
++            paymentMode: chosenPaymentMode,
++            platformFee: PLATFORM_FEE,
++            totalAmount: servicesTotal + PLATFORM_FEE,
++            status: "booked"
++        };
++
++        try {
++            const booking = await createBookingSafely(bookingData);
++
++            // Reward for online payment (UPI)
++            try { await adjustPriority(userId, +1); } catch (e) { /* non-fatal */ }
++
++            return res.status(201).json({
++                message: "Booking confirmed",
++                bookingId: booking._id,
++                slot: { start: booking.slotStart, end: booking.slotEnd }
++            });
++        } catch (err) {
++            if (err && err.code === "SLOT_BOOKED") {
++                return res.status(409).json({ message: "Slot already booked" });
++            }
++            throw err;
++        }
