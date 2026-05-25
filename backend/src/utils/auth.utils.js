@@ -54,7 +54,7 @@ const extractTokenFromHeader = (authHeader) => {
  */
 const getClientIP = (req) => {
     return (
-        req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+        req.headers['x-forwarded-for'] ? .split(',')[0].trim() ||
         req.headers['x-real-ip'] ||
         req.ip ||
         req.connection.remoteAddress ||

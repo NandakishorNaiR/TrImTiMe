@@ -169,4 +169,5 @@ const BarberDashboard = () => {
     </Layout>
   );
 
-export default BarberDashboard;
+  export default BarberDashboard;
+}
