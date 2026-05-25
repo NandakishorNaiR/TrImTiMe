@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { Card, Button, Alert, Badge } from "../components/ui";
 
 const BookingSuccess = () => {
   const navigate = useNavigate();
@@ -7,70 +8,93 @@ const BookingSuccess = () => {
   const { bookingId, shop, slot, date } = state || {};
 
   return (
-    <div className="p-3 sm:p-4 max-w-xl mx-auto pb-8">
-      <div className="h-screen flex flex-col justify-center items-start">
-        <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">✅</div>
-
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">Booking Confirmed</h1>
-
-        <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-sm">
-          Your slot has been successfully reserved. Arrive on time for your appointment.
-        </p>
-
-        {/* Booking Details */}
-        {shop && slot && date && (
-          <div className="bg-gray-50 border rounded-lg p-4 mb-6 w-full">
-            <h3 className="font-semibold mb-3">Booking Details</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shop:</span>
-                <span className="font-medium">{shop.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Date:</span>
-                <span className="font-medium">{new Date(date).toLocaleDateString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Time:</span>
-                <span className="font-medium">{slot.start} – {slot.end}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Booking ID:</span>
-                <span className="font-mono text-xs">{bookingId?.substring(0, 8)}...</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Service Flow */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 w-full">
-          <h3 className="font-semibold text-green-900 mb-3">📋 What Happens Next</h3>
-          <ol className="space-y-2 text-sm text-green-800">
-            <li className="flex gap-2">
-              <span className="font-bold">1.</span>
-              <span>Arrive on time at the salon</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="font-bold">2.</span>
-              <span>Show your booking ID to the barber</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="font-bold">3.</span>
-              <span>Enjoy your service</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="font-bold">4.</span>
-              <span>Pay at the end (UPI or CASH)</span>
-            </li>
-          </ol>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-success-50 via-neutral-50 to-accent-50 p-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Success Icon */}
+        <div className="text-center">
+          <div className="text-7xl mb-6 animate-bounce">✅</div>
+          <h1 className="text-h2 font-bold text-neutral-900 mb-2">Booking Confirmed!</h1>
+          <p className="text-body text-neutral-600">
+            Your appointment has been successfully reserved.
+          </p>
         </div>
 
-        <button
-          onClick={() => navigate("/my-bookings")}
-          className="w-full bg-black text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-800 active:scale-95 transition-all text-sm sm:text-base"
-        >
-          View My Bookings
-        </button>
+        {/* Booking Details Card */}
+        {shop && slot && date && (
+          <Card shadow="lg" className="space-y-4">
+            <h3 className="text-h4 font-bold text-neutral-900">Booking Details</h3>
+            
+            <div className="space-y-3 border-t border-neutral-200 pt-4">
+              <div className="flex justify-between items-center">
+                <span className="text-body-small text-neutral-600">💼 Shop</span>
+                <span className="font-semibold text-neutral-900">{shop.name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-body-small text-neutral-600">📅 Date</span>
+                <span className="font-semibold text-neutral-900">
+                  {new Date(date).toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-body-small text-neutral-600">🕐 Time</span>
+                <span className="font-semibold text-neutral-900">{slot.start} – {slot.end}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-body-small text-neutral-600">🎟️ Booking ID</span>
+                <span className="font-mono text-sm bg-neutral-100 px-2 py-1 rounded">
+                  {bookingId?.substring(0, 8)}...
+                </span>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Next Steps Card */}
+        <Card shadow="lg" className="bg-gradient-to-br from-success-50 to-accent-50 border border-success-200 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-h4">📋</span>
+            <h3 className="text-h4 font-bold text-success-900">What Happens Next</h3>
+          </div>
+          
+          <ol className="space-y-3 text-sm">
+            {[
+              { icon: '⏰', text: 'Arrive on time at the salon' },
+              { icon: '🆔', text: 'Show your booking ID to the barber' },
+              { icon: '✂️', text: 'Enjoy your service' },
+              { icon: '💳', text: 'Pay at the end (UPI or CASH)' }
+            ].map((step, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="text-xl">{step.icon}</span>
+                <span className="text-success-800">{step.text}</span>
+              </li>
+            ))}
+          </ol>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <Button
+            fullWidth
+            variant="primary"
+            size="lg"
+            onClick={() => navigate("/my-bookings")}
+          >
+            View My Bookings
+          </Button>
+          <Button
+            fullWidth
+            variant="secondary"
+            size="lg"
+            onClick={() => navigate("/")}
+          >
+            Back to Home
+          </Button>
+        </div>
       </div>
     </div>
   );

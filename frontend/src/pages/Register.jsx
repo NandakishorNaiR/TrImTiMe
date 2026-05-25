@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../api/auth.api";
-import GlassCard from "../components/ui/GlassCard";
+import { Card, Input, Button, Alert, Badge } from "../components/ui";
 
 const Register = () => {
 	const [phone, setPhone] = useState("");
@@ -40,7 +40,6 @@ const Register = () => {
 				role 
 			};
 			
-			// Add gender preference for customers
 			if (role === 'CUSTOMER' && genderPreference) {
 				registerPayload.genderPreference = genderPreference;
 			}
@@ -53,7 +52,6 @@ const Register = () => {
 
 			login(data.token);
 
-			// Store user data
 			localStorage.setItem('user', JSON.stringify({
 				...data.user,
 				genderPreference: role === 'CUSTOMER' ? genderPreference : undefined
@@ -72,122 +70,122 @@ const Register = () => {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-3 sm:p-4">
-			<GlassCard className="w-full max-w-md">
-				<div className="text-center mb-4 sm:mb-6">
-					<h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">✂️ TrimTime</h1>
-					<p className="text-sm sm:text-base text-gray-600">Create your account</p>
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 p-4">
+			<div className="w-full max-w-md">
+				{/* Header */}
+				<div className="text-center mb-8">
+					<div className="text-5xl mb-3">✂️</div>
+					<h1 className="text-h2 font-bold text-neutral-900">TrimTime</h1>
+					<p className="text-body text-neutral-600 mt-2">Create your account</p>
 				</div>
 
-				{/* Role Selection */}
-				<div className="mb-4 sm:mb-6">
-					<label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">I am a:</label>
-					<div className="grid grid-cols-2 gap-2 sm:gap-3">
-						{[
-							{ value: 'CUSTOMER', label: '👤 Customer', desc: 'Book appointments' },
-							{ value: 'BARBER', label: '💇 Barber', desc: 'Manage shop' }
-						].map(option => (
-							<button
-								key={option.value}
-								onClick={() => {
-									setRole(option.value);
-									setGenderPreference(null);
-								}}
-								className={`p-2 sm:p-3 rounded-lg border-2 transition-all ${
-									role === option.value
-										? 'border-blue-500 bg-blue-50'
-										: 'border-gray-200 bg-white hover:border-blue-200 active:scale-95'
-								}`}
-							>
-								<div className="text-base sm:text-lg mb-0.5 sm:mb-1">{option.label}</div>
-								<div className="text-xs text-gray-500">{option.desc}</div>
-							</button>
-						))}
-					</div>
-				</div>
-
-				{/* Gender Preference for Customers */}
-				{role === 'CUSTOMER' && (
-					<div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
-						<label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Your Preference:</label>
-						<div className="space-y-1.5 sm:space-y-2">
+				{/* Registration Card */}
+				<Card shadow="lg" className="space-y-6">
+					{/* Role Selection */}
+					<div>
+						<label className="block text-label font-semibold text-neutral-700 mb-3">I am a:</label>
+						<div className="grid grid-cols-2 gap-3">
 							{[
-								{ value: 'MALE', label: '👨 Male Barber Shops', color: 'blue' },
-								{ value: 'FEMALE', label: '👩 Female Salons', color: 'pink' },
-								{ value: 'UNISEX', label: '👥 See All (Unisex)', color: 'purple' }
+								{ value: 'CUSTOMER', label: '👤 Customer', desc: 'Book appointments' },
+								{ value: 'BARBER', label: '💇 Barber', desc: 'Manage shop' }
 							].map(option => (
 								<button
 									key={option.value}
-									onClick={() => setGenderPreference(option.value)}
-									className={`w-full py-1.5 sm:py-2 px-3 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-										genderPreference === option.value
-											? `border-${option.color}-500 bg-${option.color}-100 text-${option.color}-900`
-											: 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 active:scale-95'
+									onClick={() => {
+										setRole(option.value);
+										setGenderPreference(null);
+									}}
+									className={`p-4 rounded-lg border-2 transition-all ${
+										role === option.value
+											? 'border-primary-500 bg-primary-50'
+											: 'border-neutral-200 bg-white hover:border-primary-300'
 									}`}
 								>
-									{option.label}
+									<div className="text-xl mb-1">{option.label}</div>
+									<div className="text-caption text-neutral-500">{option.desc}</div>
 								</button>
 							))}
 						</div>
 					</div>
-				)}
 
-				{/* Full Name Input */}
-				<div className="mb-3 sm:mb-4">
-					<label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">Full Name</label>
-					<input
+					{/* Gender Preference for Customers */}
+					{role === 'CUSTOMER' && (
+						<div className="space-y-3">
+							<label className="block text-label font-semibold text-neutral-700">Your Preference:</label>
+							<div className="space-y-2">
+								{[
+									{ value: 'MALE', label: '👨 Male Barber Shops', variant: 'secondary' },
+									{ value: 'FEMALE', label: '👩 Female Salons', variant: 'accent' },
+									{ value: 'UNISEX', label: '👥 See All (Unisex)', variant: 'primary' }
+								].map(option => (
+									<button
+										key={option.value}
+										onClick={() => setGenderPreference(option.value)}
+										className={`w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all border-2 ${
+											genderPreference === option.value
+												? `border-${option.variant}-500 bg-${option.variant}-50 text-${option.variant}-700`
+												: 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300'
+										}`}
+									>
+										{option.label}
+									</button>
+								))}
+							</div>
+						</div>
+					)}
+
+					{/* Name Input */}
+					<Input
+						label="Full Name"
 						type="text"
 						placeholder="Enter your full name"
-						className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 						disabled={loading}
+						size="md"
 					/>
-				</div>
 
-				{/* Phone Input */}
-				<div className="mb-3 sm:mb-6">
-					<label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">Phone Number</label>
-					<input
+					{/* Phone Input */}
+					<Input
+						label="Phone Number"
 						type="tel"
 						placeholder="Enter 10-digit phone number"
-						className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
 						value={phone}
 						onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
 						maxLength="10"
 						disabled={loading}
+						hint="We'll send you an OTP for verification"
+						size="md"
 					/>
-					<p className="text-xs text-gray-500 mt-1">We'll send you an OTP for verification</p>
-				</div>
 
-				{/* Error Message */}
-				{error && (
-					<div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg text-xs sm:text-sm text-red-700">
-						{error}
-					</div>
-				)}
+					{/* Error Alert */}
+					{error && (
+						<Alert variant="error" message={error} />
+					)}
 
-				{/* Submit Button */}
-				<button
-					onClick={handleRegister}
-					disabled={loading || !name.trim() || phone.length !== 10 || (role === 'CUSTOMER' && !genderPreference)}
-					className={`w-full py-2.5 sm:py-3 px-4 rounded-lg font-semibold transition-all text-sm sm:text-base ${
-						loading || !name.trim() || phone.length !== 10 || (role === 'CUSTOMER' && !genderPreference)
-							? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-							: 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg active:scale-95'
-					}`}
-				>
-					{loading ? 'Creating Account...' : 'Create Account'}
-				</button>
+					{/* Create Account Button */}
+					<Button
+						fullWidth
+						variant="primary"
+						size="lg"
+						loading={loading}
+						disabled={!name.trim() || phone.length !== 10 || (role === 'CUSTOMER' && !genderPreference)}
+						onClick={handleRegister}
+					>
+						{loading ? 'Creating Account...' : 'Create Account'}
+					</Button>
+				</Card>
 
 				{/* Help Text */}
-				<div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 text-center text-xs text-gray-600">
-					<p>Already have an account?</p>
-					<Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
-						Sign In Here
+				<div className="mt-8 text-center">
+					<p className="text-body-small text-neutral-600 mb-2">Already have an account?</p>
+					<Link to="/login">
+						<span className="text-primary-600 hover:text-primary-700 font-semibold cursor-pointer">
+							Sign In Here →
+						</span>
 					</Link>
 				</div>
-			</GlassCard>
+			</div>
 		</div>
 	);
 };

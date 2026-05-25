@@ -3,9 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getShops } from "../api/shop.api";
 import ShopCard from "../components/shop/ShopCard";
 import Layout from "../components/Layout";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import GlassCard from "../components/ui/GlassCard";
+import { Input, Button, Card, Badge } from "../components/ui";
 import { SkeletonGrid } from "../components/ui/Skeleton";
 import GenderPreferenceModal from "../components/auth/GenderPreferenceModal";
 import { useAuth } from "../context/AuthContext";
@@ -108,46 +106,54 @@ const Home = () => {
     <Layout>
       <div className="space-y-8">
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 p-6 sm:p-8 md:p-12">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-500 p-8 sm:p-12 md:p-16 shadow-2xl">
           <div className="relative z-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-4xl">✂️</span>
+              <h1 className="text-h2 font-bold text-white">TrimTime</h1>
+            </div>
+            <p className="text-4xl sm:text-5xl md:text-display font-bold text-white mb-4 sm:mb-6">
               Find Your Perfect Salon
-            </h1>
-            <p className="text-blue-100 text-base sm:text-lg md:text-xl mb-4 sm:mb-6 max-w-2xl">
+            </p>
+            <p className="text-primary-100 text-lg sm:text-xl mb-8 max-w-2xl leading-relaxed">
               Book appointments at verified salons. Best services, verified professionals, transparent pricing.
             </p>
-            <div className="flex gap-2 sm:gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap">
               <Button 
-                variant="secondary" 
-                size="md"
+                variant={isAuthenticated ? "secondary" : "primary"} 
+                size="lg"
                 onClick={() => !isAuthenticated && navigate('/login')}
+                className="shadow-lg"
               >
-                {isAuthenticated ? '✓ Logged In' : 'Get Started'} →
+                {isAuthenticated ? '✓ Start Booking' : 'Get Started'} →
               </Button>
               <Button 
                 variant="ghost" 
-                size="md"
-                className="text-white border-white hover:bg-white/20"
+                size="lg"
+                className="text-white border-2 border-white hover:bg-white/10"
                 onClick={() => document.querySelector('#shops-section')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Browse Shops ↓
               </Button>
             </div>
           </div>
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32" />
-          <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full -ml-20 -mb-20" />
+          {/* Decorative gradient shapes */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48 blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/5 rounded-full -ml-36 -mb-36 blur-3xl" />
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-          <GlassCard className="text-center p-3 sm:p-4 md:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-blue-600">{shops.length}+</div>
-            <div className="text-gray-600 text-xs sm:text-sm mt-1 sm:mt-2">Active Salons</div>
-          </GlassCard>
-          <GlassCard className="text-center p-3 sm:p-4 md:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-green-600">24/7</div>
-            <div className="text-gray-600 text-xs sm:text-sm mt-1 sm:mt-2">Available</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card shadow="md" hover>
+            <div className="text-center">
+              <div className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">{shops.length}+</div>
+              <div className="text-body-small text-neutral-600 mt-2">Active Salons</div>
+            </div>
+          </Card>
+          <Card shadow="md" hover>
+            <div className="text-center">
+              <div className="text-h2 font-bold bg-gradient-to-r from-success-600 to-accent-600 bg-clip-text text-transparent">24/7</div>
+              <div className="text-body-small text-neutral-600 mt-2">Available</div>
           </GlassCard>
           <GlassCard className="text-center p-3 sm:p-4 md:p-6">
             <div className="text-2xl sm:text-3xl font-bold text-purple-600">⭐ 4.8</div>

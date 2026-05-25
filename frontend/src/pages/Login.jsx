@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../api/auth.api";
-import GlassCard from "../components/ui/GlassCard";
+import { Card, Input, Button, Alert } from "../components/ui";
 
 const Login = () => {
 	const [phone, setPhone] = useState("");
@@ -43,67 +43,73 @@ const Login = () => {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-3 sm:p-4">
-			<GlassCard className="w-full max-w-sm">
-				<div className="text-center mb-6 sm:mb-8">
-					<h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">✂️ TrimTime</h1>
-					<p className="text-sm sm:text-base text-gray-600">Book your salon appointment instantly</p>
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 p-4">
+			<div className="w-full max-w-md">
+				{/* Header */}
+				<div className="text-center mb-8">
+					<div className="text-5xl mb-3">✂️</div>
+					<h1 className="text-h2 font-bold text-neutral-900">TrimTime</h1>
+					<p className="text-body text-neutral-600 mt-2">Book your salon appointment instantly</p>
 				</div>
 
-				<div className="space-y-3 sm:space-y-4">
+				{/* Login Card */}
+				<Card shadow="lg" className="space-y-6">
+					{/* Phone Input */}
 					<div>
-						<label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">Phone Number</label>
-						<input
+						<Input
+							label="Phone Number"
 							type="tel"
 							placeholder="Enter 10-digit phone number"
-							className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
 							value={phone}
 							onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
 							maxLength="10"
 							disabled={loading}
+							hint="We'll use this to verify your identity"
 						/>
-						<p className="text-xs text-gray-500 mt-1">We'll use this to send you OTP</p>
 					</div>
 
+					{/* Error Alert */}
 					{error && (
-						<div className="p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg text-xs sm:text-sm text-red-700">
-							{error}
-						</div>
+						<Alert variant="error" message={error} />
 					)}
 
-					<button
+					{/* Sign In Button */}
+					<Button
+						fullWidth
+						variant="primary"
+						size="lg"
+						loading={loading}
+						disabled={phone.length !== 10}
 						onClick={handleLogin}
-						disabled={loading || phone.length !== 10}
-						className={`w-full py-2.5 sm:py-3 px-4 rounded-lg font-semibold transition-all text-sm sm:text-base ${
-							loading || phone.length !== 10
-								? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-								: 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg active:scale-95'
-						}`}
 					>
 						{loading ? 'Signing in...' : 'Sign In'}
-					</button>
+					</Button>
 
-					<div className="relative">
-						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-gray-200"></div>
-						</div>
-						<div className="relative flex justify-center text-xs">
-							<span className="px-2 bg-white text-gray-500">or</span>
-						</div>
+					{/* Divider */}
+					<div className="relative flex items-center gap-3">
+						<div className="flex-1 h-px bg-neutral-200"></div>
+						<span className="text-label text-neutral-500">or</span>
+						<div className="flex-1 h-px bg-neutral-200"></div>
 					</div>
 
-					<Link to="/register">
-						<button className="w-full py-2.5 sm:py-3 px-4 rounded-lg font-semibold border-2 border-blue-600 text-blue-600 hover:bg-blue-50 transition-all text-sm sm:text-base active:scale-95">
+					{/* Create Account Button */}
+					<Link to="/register" className="block">
+						<Button
+							fullWidth
+							variant="secondary"
+							size="lg"
+						>
 							Create Account
-						</button>
+						</Button>
 					</Link>
-				</div>
+				</Card>
 
-				<div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 text-center text-xs text-gray-600 space-y-0.5">
-					<p>Existing users? Just enter your phone number.</p>
-					<p>New user? Click "Create Account" to get started.</p>
+				{/* Help Text */}
+				<div className="mt-8 text-center space-y-2">
+					<p className="text-body-small text-neutral-600">Existing users? Just enter your phone number.</p>
+					<p className="text-body-small text-neutral-600">New user? Click "Create Account" to get started.</p>
 				</div>
-			</GlassCard>
+			</div>
 		</div>
 	);
 };
