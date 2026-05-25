@@ -1,5 +1,17 @@
 const User = require('../models/User.model');
 const jwt = require('jsonwebtoken');
+const {
+    generateDeviceFingerprint,
+    getClientIP,
+    getUserAgent,
+    checkLoginAttempts,
+    recordLoginAttempt,
+    createSession,
+    validateSession,
+    updateSessionActivity,
+    invalidateAllSessions,
+    invalidateSession
+} = require('../utils/auth.utils');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 const JWT_EXPIRES_IN = '7d';
@@ -30,7 +42,21 @@ exports.login = async(req, res) => {
         const { phone, name, role, genderPreference } = req.body;
         if (!phone) return res.status(400).json({ message: 'Phone required' });
 
-        console.log('login attempt:', { phone, name, role, hasGenderPref: !!genderPreference });
+        const ipAddress = getClientIP(req);
+        const userAgent = getUserAgent(req);
+        
+        console.log('login attempt:', { phone, name, role, hasGenderPref: !!genderPreference, ipAddress });
+
+        // ✅ SECURITY: Check for account lockout (brute force protection)
+        const attemptCheck = await checkLoginAttempts(phone, ipAddress);
+        if (attemptCheck.blocked) {
+            await recordLoginAttempt(phone, ipAddress, false, 'account_locked');
+            const waitMinutes = Math.ceil((attemptCheck.lockoutUntil - new Date()) / 60000);
+            return res.status(429).json({ 
+                message: `Too many login attempts. Please try again in ${waitMinutes} minutes.`,
+                lockoutUntil: attemptCheck.lockoutUntil
+            });
+        }
 
         // Find or create user
         let user = await User.findOne({ phone });
@@ -38,16 +64,12 @@ exports.login = async(req, res) => {
 
         if (!user) {
             // New user: create account
-            // Default to CUSTOMER if not specified
             const userRole = role || 'CUSTOMER';
             if (userRole === 'ADMIN') return res.status(403).json({ message: 'Cannot register as admin' });
 
-            // Use provided name or generate default from phone
             const userName = name && name.trim() ? name : `Customer_${phone.slice(-4)}`;
-
             const userData = { name: userName, phone, role: userRole };
 
-            // Add gender preference for customers only
             if (userRole === 'CUSTOMER' && genderPreference) {
                 const validPrefs = ['MALE', 'FEMALE', 'UNISEX'];
                 if (!validPrefs.includes(genderPreference)) {
@@ -64,13 +86,11 @@ exports.login = async(req, res) => {
             const updates = {};
             let hasUpdates = false;
 
-            // Only update name if provided and different
             if (name && name.trim() && name !== user.name) {
                 updates.name = name;
                 hasUpdates = true;
             }
 
-            // Only update gender preference if customer and valid
             if (genderPreference && user.role === 'CUSTOMER') {
                 const validPrefs = ['MALE', 'FEMALE', 'UNISEX'];
                 if (!validPrefs.includes(genderPreference)) {
@@ -82,7 +102,6 @@ exports.login = async(req, res) => {
                 }
             }
 
-            // Only update if there are changes
             if (hasUpdates) {
                 console.log('updating user:', { userId: user._id, updates });
                 user = await User.findByIdAndUpdate(user._id, updates, { new: true });
@@ -96,12 +115,10 @@ exports.login = async(req, res) => {
             const freshUser = await User.findById(user._id).populate('shop').lean();
             if (freshUser) {
                 shop = freshUser.shop || null;
-                // Also update local user object with latest data
                 user = freshUser;
             }
         } catch (popErr) {
             console.warn('populate shop warning:', popErr.message);
-            // Use existing user object if populate fails
         }
 
         const payload = {
@@ -113,6 +130,14 @@ exports.login = async(req, res) => {
 
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
         console.log('token generated for user:', user._id);
+
+        // ✅ SECURITY: Create device-specific session
+        const deviceFingerprint = generateDeviceFingerprint(userAgent, ipAddress);
+        await createSession(user._id, deviceFingerprint, userAgent, ipAddress, token);
+        console.log('session created for device:', deviceFingerprint);
+
+        // Record successful login
+        await recordLoginAttempt(phone, ipAddress, true);
 
         return res.json({
             token,
@@ -135,6 +160,20 @@ exports.me = async(req, res) => {
     try {
         const userId = req.user && req.user.id;
         if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+        // ✅ SECURITY: Validate that session exists for this device
+        const userAgent = getUserAgent(req);
+        const ipAddress = getClientIP(req);
+        const deviceFingerprint = generateDeviceFingerprint(userAgent, ipAddress);
+        
+        const sessionValid = await validateSession(userId, deviceFingerprint);
+        if (!sessionValid) {
+            return res.status(401).json({ message: 'Invalid session. Please login again.' });
+        }
+
+        // Update last activity
+        await updateSessionActivity(userId, deviceFingerprint);
+
         const user = await User.findById(userId).lean();
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -218,6 +257,46 @@ exports.updatePreference = async(req, res) => {
             message: 'Preference updated successfully',
             genderPreference: user.genderPreference
         });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// ✅ SECURITY: Logout - invalidate session on this device
+exports.logout = async(req, res) => {
+    try {
+        const userId = req.user && req.user.id;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+        const userAgent = getUserAgent(req);
+        const ipAddress = getClientIP(req);
+        const deviceFingerprint = generateDeviceFingerprint(userAgent, ipAddress);
+
+        // Invalidate this specific session
+        await invalidateSession(userId, deviceFingerprint);
+        
+        console.log('user logged out:', userId, 'device:', deviceFingerprint);
+
+        return res.json({ message: 'Logged out successfully' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// ✅ SECURITY: Logout from all devices
+exports.logoutAll = async(req, res) => {
+    try {
+        const userId = req.user && req.user.id;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+        // Invalidate all sessions for this user
+        await invalidateAllSessions(userId);
+        
+        console.log('user logged out from all devices:', userId);
+
+        return res.json({ message: 'Logged out from all devices successfully' });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: 'Server error' });

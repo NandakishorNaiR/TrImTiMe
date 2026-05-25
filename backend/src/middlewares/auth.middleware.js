@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const { getClientIP, getUserAgent, generateDeviceFingerprint, validateSession } = require('../utils/auth.utils');
+
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 
 // roles: array of allowed roles, e.g. ["BARBER","ADMIN"]. If empty, allow any authenticated user.
@@ -16,11 +18,22 @@ const requireAuth = (roles = []) => {
                 return res.status(403).json({ message: 'Forbidden' });
             }
 
+            // ✅ SECURITY: Validate session for this device
+            const userAgent = getUserAgent(req);
+            const ipAddress = getClientIP(req);
+            const deviceFingerprint = generateDeviceFingerprint(userAgent, ipAddress);
+            
+            const sessionValid = await validateSession(payload.id, deviceFingerprint);
+            if (!sessionValid) {
+                return res.status(401).json({ message: 'Invalid session. Please login again.' });
+            }
+
             // inject user
             req.user = {
                 id: payload.id,
                 role: payload.role,
-                shopId: payload.shopId || null
+                shopId: payload.shopId || null,
+                deviceFingerprint // Store for reference
             };
 
             // If barber token doesn't include shopId (older token), fetch from DB to ensure shop routes work
@@ -36,6 +49,9 @@ const requireAuth = (roles = []) => {
 
             next();
         } catch (err) {
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: 'Token expired. Please login again.' });
+            }
             return res.status(401).json({ message: 'Invalid token' });
         }
     };

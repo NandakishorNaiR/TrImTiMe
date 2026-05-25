@@ -1,7 +1,28 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const { globalLimiter, authLimiter, bookingLimiter } = require('./middlewares/rateLimit.middleware');
 const app = express();
+
+// ✅ SECURITY: Add security headers with Helmet
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+        },
+    },
+    frameguard: { action: 'deny' }, // Prevent clickjacking
+    noSniff: true, // Prevent MIME type sniffing
+    xssFilter: true, // Enable XSS filter
+    hsts: { 
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+    }
+}));
 
 // allow cross-origin requests from the frontend dev server
 const isDev = process.env.NODE_ENV !== 'production';
