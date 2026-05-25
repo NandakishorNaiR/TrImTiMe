@@ -5,9 +5,10 @@ import UpcomingBookings from "./UpcomingBookings";
 import OfflineBookingForm from "../../components/barber/OfflineBookingForm";
 import { getBarberDashboard, getMyShop } from "../../api/barber.api";
 import Layout from "../../components/Layout";
-import GlassCard from "../../components/ui/GlassCard";
+import { Card, CardHeader, CardTitle, CardBody, CardFooter } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { Button } from "../../components/ui/Button";
 import { formatCurrency } from "../../utils/format";
-import Button from "../../components/Button";
 
 const BarberDashboard = () => {
   useBarberGuard();
@@ -52,72 +53,120 @@ const BarberDashboard = () => {
     return () => window.removeEventListener('bookingUpdated', handleBookingUpdate);
   }, []);
 
-  if (!data) return <div className="p-4">Loading dashboard…</div>;
-
-  return (
+  if (!data) return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-xl font-bold mb-4">{shop?.name ? `${shop.name} Dashboard` : 'Salon Dashboard'}</h1>
-
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <GlassCard title="Bookings Today"><div className="text-2xl font-bold">{data.todayCount}</div></GlassCard>
-          <GlassCard title="Online Earnings"><div className="text-2xl font-bold">{formatCurrency(data.onlineTotal)}</div></GlassCard>
-          <GlassCard title="COD Pending"><div className="text-2xl font-bold">{formatCurrency(data.codPending)}</div></GlassCard>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="text-4xl animate-spin">⏳</div>
+          <p className="text-body text-neutral-600">Loading dashboard…</p>
         </div>
-
-        <SettlementCard settlement={data.todaySettlement} />
-
-        <OfflineBookingForm shop={shop} onBookingCreated={loadDashboard} />
-
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex gap-2" role="tablist" aria-label="Booking tabs">
-            <Button variant={tab === 'today' ? 'primary' : 'ghost'} onClick={() => setTab('today')} aria-pressed={tab === 'today'}>Today</Button>
-            <Button variant={tab === 'upcoming' ? 'primary' : 'ghost'} onClick={() => setTab('upcoming')} aria-pressed={tab === 'upcoming'}>Upcoming</Button>
-          </div>
-        </div>
-
-        {tab === 'today' && <TodayBookings bookings={data.todayBookings} />}
-        {tab === 'upcoming' && <UpcomingBookings bookings={data.upcomingBookings} />}
       </div>
     </Layout>
   );
-};
-
-const SummaryBox = ({ label, value }) => (
-  <div className="border rounded-xl p-3 text-center">
-    <p className="text-xs text-gray-500">{label}</p>
-    <p className="text-lg font-semibold">{value}</p>
-  </div>
-);
-
-const SettlementCard = ({ settlement }) => {
-  if (!settlement) return null;
 
   return (
-    <div className="border rounded-xl p-4 mb-6 bg-gray-50">
-      <h3 className="font-semibold mb-3">Today Settlement</h3>
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 p-4 pb-12">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div>
+            <h1 className="text-h2 font-bold text-neutral-900">{shop?.name || 'Dashboard'}</h1>
+            <p className="text-body-small text-neutral-600 mt-1">Welcome back! Here's your business overview.</p>
+          </div>
 
-      <div className="text-sm space-y-2">
-        <Row label="Online earnings" value={`₹${settlement.online}`} />
-        <Row label="COD received" value={`₹${settlement.cod}`} />
-        <hr />
-        <Row
-          label="Net payout"
-          value={`₹${settlement.online - settlement.cod}`}
-          bold
-        />
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Bookings Today */}
+            <Card shadow="lg" className="bg-white hover:shadow-xl transition-shadow">
+              <CardBody className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-label font-semibold text-neutral-600">Bookings Today</p>
+                  <span className="text-2xl">📅</span>
+                </div>
+                <p className="text-h3 font-bold text-primary-700">{data.todayCount}</p>
+              </CardBody>
+            </Card>
+
+            {/* Online Earnings */}
+            <Card shadow="lg" className="bg-white hover:shadow-xl transition-shadow">
+              <CardBody className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-label font-semibold text-neutral-600">Online Earnings</p>
+                  <span className="text-2xl">💳</span>
+                </div>
+                <p className="text-h3 font-bold text-accent-700">{formatCurrency(data.onlineTotal)}</p>
+              </CardBody>
+            </Card>
+
+            {/* COD Pending */}
+            <Card shadow="lg" className="bg-white hover:shadow-xl transition-shadow">
+              <CardBody className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-label font-semibold text-neutral-600">COD Pending</p>
+                  <span className="text-2xl">⏳</span>
+                </div>
+                <p className="text-h3 font-bold text-warning-700">{formatCurrency(data.codPending)}</p>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Settlement Card */}
+          {data.todaySettlement && (
+            <Card shadow="lg">
+              <CardHeader className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-t-xl">
+                <CardTitle>Today Settlement</CardTitle>
+              </CardHeader>
+
+              <CardBody className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                  <span className="text-body text-neutral-700">Online Earnings</span>
+                  <span className="font-bold text-neutral-900">₹{data.todaySettlement.online}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                  <span className="text-body text-neutral-700">COD Received</span>
+                  <span className="font-bold text-neutral-900">₹{data.todaySettlement.cod}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 bg-primary-50 rounded-lg px-3">
+                  <span className="font-semibold text-primary-900">Net Payout</span>
+                  <span className="font-bold text-lg text-primary-700">₹{data.todaySettlement.online + data.todaySettlement.cod}</span>
+                </div>
+              </CardBody>
+
+              <CardFooter className="text-caption text-neutral-500">
+                💡 Settlement will be processed at 10:00 PM
+              </CardFooter>
+            </Card>
+          )}
+
+          {/* Offline Booking Form */}
+          <div className="rounded-xl overflow-hidden">
+            <OfflineBookingForm shop={shop} onBookingCreated={loadDashboard} />
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 border-b border-neutral-200">
+            <Button
+              variant={tab === 'today' ? 'primary' : 'ghost'}
+              onClick={() => setTab('today')}
+              className={tab === 'today' ? 'border-b-2 border-primary-600' : ''}
+            >
+              Today's Schedule
+            </Button>
+            <Button
+              variant={tab === 'upcoming' ? 'primary' : 'ghost'}
+              onClick={() => setTab('upcoming')}
+              className={tab === 'upcoming' ? 'border-b-2 border-primary-600' : ''}
+            >
+              Upcoming
+            </Button>
+          </div>
+
+          {/* Tab Content */}
+          {tab === 'today' && <TodayBookings bookings={data.todayBookings} />}
+          {tab === 'upcoming' && <UpcomingBookings bookings={data.upcomingBookings} />}
+        </div>
       </div>
-
-      <p className="text-xs text-gray-500 mt-3">Settlement will be processed at 10:00 PM</p>
-    </div>
+    </Layout>
   );
-};
-
-const Row = ({ label, value, bold }) => (
-  <div className={`flex justify-between ${bold ? "font-semibold" : ""}`}>
-    <span>{label}</span>
-    <span>{value}</span>
-  </div>
-);
 
 export default BarberDashboard;

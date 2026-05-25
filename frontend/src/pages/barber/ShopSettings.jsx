@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyShop, updateMyShop, getMyShopStats } from "../../api/barber.api";
-import GlassCard from "../../components/ui/GlassCard";
+import { Card, CardHeader, CardTitle, CardBody, CardFooter } from "../../components/ui/Card";
+import { Input } from "../../components/ui/Input";
+import { Button } from "../../components/ui/Button";
+import { Badge } from "../../components/ui/Badge";
+import { Alert } from "../../components/ui/Alert";
 import ShopClosure from "../../components/barber/ShopClosure";
 
 const ShopSettings = () => {
   const [shop, setShop] = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     load();
   }, []);
 
-  const [stats, setStats] = useState(null);
   useEffect(() => {
     (async () => {
       try {
@@ -51,140 +56,213 @@ const ShopSettings = () => {
   };
 
   const save = async () => {
+    setSaving(true);
     try {
       await updateMyShop(shop);
-      alert("Shop details saved");
+      alert("✓ Shop details saved successfully");
     } catch (err) {
       console.error(err);
-      alert("Save failed");
+      alert("❌ Save failed. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return <div className="p-4">Loading…</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center space-y-4">
+        <div className="text-4xl animate-spin">⏳</div>
+        <p className="text-body text-neutral-600">Loading settings…</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="max-w-5xl mx-auto px-4 space-y-6 py-6">
-      {/* Shop Overview */}
-      <GlassCard>
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">{shop.name || "My Shop"}</h1>
-            <p className="text-sm text-gray-600">{shop.type ? `${shop.type.charAt(0).toUpperCase() + shop.type.slice(1)} Salon` : "Salon"} • ⭐ 4.6</p>
-          </div>
-          <span className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700">
-            Open Today
-          </span>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 p-4 pb-12">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-h2 font-bold text-neutral-900">Shop Settings</h1>
+          <p className="text-body-small text-neutral-600 mt-1">Manage your shop details and preferences</p>
         </div>
-      </GlassCard>
 
-      {/* Shop Profile */}
-      <GlassCard title="Shop Profile & Timings">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Shop Name" name="name" value={shop.name || ""} onChange={handleChange} />
-          <div>
-            <label className="text-sm">Shop Type</label>
-            <select
-              name="type"
-              value={shop.type || "UNISEX"}
-              onChange={handleChange}
-              className="input mt-1 w-full"
+        {/* Shop Overview Card */}
+        <Card shadow="lg" className="bg-gradient-to-r from-primary-100 to-secondary-100 border-2 border-primary-200">
+          <CardBody className="space-y-2">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-h4 font-bold text-primary-900">{shop.name || "My Shop"}</p>
+                <p className="text-body-small text-primary-700 mt-1">
+                  {shop.type === 'MALE' ? '👨 Male Barber' : shop.type === 'FEMALE' ? '👩 Female Salon' : '👥 Unisex Shop'}
+                </p>
+              </div>
+              <Badge variant="success">✓ Active</Badge>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Shop Profile & Settings */}
+        <Card shadow="lg">
+          <CardHeader className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-t-xl">
+            <CardTitle>Basic Information</CardTitle>
+          </CardHeader>
+
+          <CardBody className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Shop Name"
+                name="name"
+                value={shop.name || ""}
+                onChange={handleChange}
+              />
+
+              <div>
+                <label className="text-label font-semibold text-neutral-700 block mb-2">Shop Type</label>
+                <select
+                  name="type"
+                  value={shop.type || "UNISEX"}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="MALE">👨 Male (Barber Shops)</option>
+                  <option value="FEMALE">👩 Female (Salons)</option>
+                  <option value="UNISEX">👥 Unisex (Mixed Services)</option>
+                </select>
+              </div>
+
+              <Input
+                label="Phone Number"
+                type="tel"
+                name="phone"
+                value={shop.phone || ""}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Number of Chairs/Capacity"
+                type="number"
+                name="chairs"
+                min="1"
+                value={shop.chairs || 1}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Address"
+                name="address"
+                value={shop.address || ""}
+                onChange={handleChange}
+                className="md:col-span-2"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div>
+                <label className="text-label font-semibold text-neutral-700 block mb-2">Opening Time</label>
+                <input
+                  type="time"
+                  name="openingTime"
+                  value={shop.openingTime || "10:00"}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-label font-semibold text-neutral-700 block mb-2">Closing Time</label>
+                <input
+                  type="time"
+                  name="closingTime"
+                  value={shop.closingTime || "20:00"}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+
+            {/* COD Toggle */}
+            <div className="flex items-center justify-between p-3 bg-accent-50 rounded-lg border border-accent-200 mt-4">
+              <div>
+                <p className="font-medium text-neutral-900">Accept Cash on Delivery (COD)</p>
+                <p className="text-body-small text-neutral-600">Allow customers to pay at the shop</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={!!shop.acceptCOD}
+                onChange={(e) => setShop({ ...shop, acceptCOD: e.target.checked })}
+                className="w-5 h-5 rounded cursor-pointer"
+              />
+            </div>
+          </CardBody>
+
+          <CardFooter>
+            <Button
+              variant="primary"
+              fullWidth
+              loading={saving}
+              onClick={save}
             >
-              <option value="MALE">👨 Male (Barber Shops)</option>
-              <option value="FEMALE">👩 Female (Salons)</option>
-              <option value="UNISEX">👥 Unisex (Mixed Services)</option>
-            </select>
-          </div>
-          <Input label="Phone" name="phone" value={shop.phone || ""} onChange={handleChange} />
-          <Input label="Number of Chairs/Capacity" name="chairs" type="number" min="1" value={shop.chairs || 1} onChange={handleChange} />
-          <Input label="Address" name="address" value={shop.address || ""} onChange={handleChange} className="md:col-span-2" />
-        </div>
-        <div className="flex gap-4 mt-4">
-          <div className="flex-1">
-            <label className="text-sm">Opening Time</label>
-            <input type="time" className="input mt-1 w-full" name="openingTime" value={shop.openingTime || "10:00"} onChange={handleChange} />
-          </div>
-          <div className="flex-1">
-            <label className="text-sm">Closing Time</label>
-            <input type="time" className="input mt-1 w-full" name="closingTime" value={shop.closingTime || "20:00"} onChange={handleChange} />
-          </div>
-        </div>
-        <div className="mt-4">
-          <Toggle label="Accept Cash on Delivery" checked={!!shop.acceptCOD} onChange={(v) => setShop({ ...shop, acceptCOD: v })} />
-        </div>
+              ✓ Save Changes
+            </Button>
+          </CardFooter>
+        </Card>
+
+        {/* Statistics Card */}
         {stats && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="border rounded p-3">
-              <div className="text-xs text-gray-500">Online Collected</div>
-              <div className="text-lg font-bold">₹{stats.onlineRevenue || 0}</div>
-            </div>
-            <div className="border rounded p-3">
-              <div className="text-xs text-gray-500">COD Bookings Value</div>
-              <div className="text-lg font-bold">₹{stats.codValue || 0}</div>
-            </div>
-            <div className="border rounded p-3">
-              <div className="text-xs text-gray-500">COD Due (fee)</div>
-              <div className="text-lg font-bold text-red-600">₹{stats.codDue || 0}</div>
-            </div>
-            <div className="border rounded p-3">
-              <div className="text-xs text-gray-500">Net Payout</div>
-              <div className="text-lg font-bold">₹{stats.payout || 0}</div>
-            </div>
-          </div>
+          <Card shadow="lg">
+            <CardHeader>
+              <CardTitle>Financial Overview</CardTitle>
+            </CardHeader>
+
+            <CardBody>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-primary-50 p-3 rounded-lg border border-primary-200">
+                  <p className="text-caption text-primary-700 font-semibold">Online Collected</p>
+                  <p className="text-h5 font-bold text-primary-900 mt-1">₹{stats.onlineRevenue || 0}</p>
+                </div>
+
+                <div className="bg-accent-50 p-3 rounded-lg border border-accent-200">
+                  <p className="text-caption text-accent-700 font-semibold">COD Value</p>
+                  <p className="text-h5 font-bold text-accent-900 mt-1">₹{stats.codValue || 0}</p>
+                </div>
+
+                <div className="bg-warning-50 p-3 rounded-lg border border-warning-200">
+                  <p className="text-caption text-warning-700 font-semibold">COD Due (Fee)</p>
+                  <p className="text-h5 font-bold text-warning-900 mt-1">₹{stats.codDue || 0}</p>
+                </div>
+
+                <div className="bg-success-50 p-3 rounded-lg border border-success-200">
+                  <p className="text-caption text-success-700 font-semibold">Net Payout</p>
+                  <p className="text-h5 font-bold text-success-900 mt-1">₹{stats.payout || 0}</p>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
         )}
-        <button className="mt-4 px-4 py-2 bg-black text-white rounded" onClick={save}>
-          Save Changes
-        </button>
-      </GlassCard>
 
-      {/* Services Shortcut */}
-      <GlassCard>
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="font-semibold">Services</h3>
-            <p className="text-sm text-gray-600">Manage prices & duration</p>
-          </div>
-          <a href="/barber/services" className="px-4 py-2 border rounded-lg text-sm">
-            Manage
-          </a>
+        {/* Services Management */}
+        <Card shadow="lg">
+          <CardBody className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-neutral-900">📋 Manage Services</p>
+              <p className="text-body-small text-neutral-600 mt-1">Update service prices and durations</p>
+            </div>
+            <Button
+              variant="primary"
+              onClick={() => navigate('/barber/services')}
+            >
+              Go to Services
+            </Button>
+          </CardBody>
+        </Card>
+
+        {/* Emergency Actions */}
+        <div className="rounded-xl overflow-hidden">
+          <ShopClosure />
         </div>
-      </GlassCard>
-
-      {/* Emergency Actions */}
-      <div className="mt-2">
-        <ShopClosure />
       </div>
     </div>
   );
 };
-
-/* Reusable UI */
-
-const Input = ({ label, className = "", ...props }) => (
-  <div className={className}>
-    <label className="text-xs text-gray-500">{label}</label>
-    <input
-      {...props}
-      className={`border rounded-lg px-3 py-2 w-full mt-1 ${props.className || ""}`}
-    />
-  </div>
-);
-
-const Toggle = ({ label, checked, onChange }) => (
-  <div className="flex items-center justify-between">
-    <span className="text-sm">{label}</span>
-    <button
-      onClick={() => onChange(!checked)}
-      className={`w-12 h-6 rounded-full p-1 transition ${
-        checked ? "bg-black" : "bg-gray-300"
-      }`}
-    >
-      <div
-        className={`bg-white w-4 h-4 rounded-full transition ${
-          checked ? "translate-x-6" : ""
-        }`}
-      />
-    </button>
-  </div>
-);
 
 export default ShopSettings;
