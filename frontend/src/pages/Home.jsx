@@ -4,6 +4,7 @@ import { getShops } from "../api/shop.api";
 import ShopCard from "../components/shop/ShopCard";
 import Layout from "../components/Layout";
 import { Input, Button, Card, Badge } from "../components/ui";
+import GlassCard from "../components/ui/GlassCard";
 import { SkeletonGrid } from "../components/ui/Skeleton";
 import GenderPreferenceModal from "../components/auth/GenderPreferenceModal";
 import { useAuth } from "../context/AuthContext";
@@ -154,7 +155,8 @@ const Home = () => {
             <div className="text-center">
               <div className="text-h2 font-bold bg-gradient-to-r from-success-600 to-accent-600 bg-clip-text text-transparent">24/7</div>
               <div className="text-body-small text-neutral-600 mt-2">Available</div>
-          </GlassCard>
+            </div>
+          </Card>
           <GlassCard className="text-center p-3 sm:p-4 md:p-6">
             <div className="text-2xl sm:text-3xl font-bold text-purple-600">⭐ 4.8</div>
             <div className="text-gray-600 text-xs sm:text-sm mt-1 sm:mt-2">Avg Rating</div>

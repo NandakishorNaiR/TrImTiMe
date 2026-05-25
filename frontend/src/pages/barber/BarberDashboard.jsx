@@ -168,6 +168,6 @@ const BarberDashboard = () => {
       </div>
     </Layout>
   );
-
-  export default BarberDashboard;
 }
+
+export default BarberDashboard;
