@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getMyProfile, updateMyProfile } from '../api/auth.api';
-import Button from '../components/Button';
-import Input from '../components/Input';
-import GlassCard from '../components/ui/GlassCard';
-import { SkeletonCard } from '../components/ui/Skeleton';
+import { Card, CardHeader, CardTitle, CardBody, CardFooter, Input, Button, Alert, Badge } from '../components/ui';
 import { validators } from '../utils/validation';
 
 export default function Profile() {
@@ -108,198 +105,189 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <SkeletonCard />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="text-4xl animate-spin">⏳</div>
+          <p className="text-body text-neutral-600">Loading profile…</p>
+        </div>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <GlassCard title="Profile" className="text-center py-8 sm:py-12">
-          <p className="text-xs sm:text-base text-gray-600 mb-3 sm:mb-4">Unable to load profile</p>
-          <Button onClick={() => navigate('/')}>Go Back</Button>
-        </GlassCard>
+      <div className="max-w-2xl mx-auto p-4">
+        <Alert variant="error" title="Error" message="Failed to load profile" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-      {/* Header */}
-      <div className="mb-4 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">My Profile</h1>
-        <p className="text-xs sm:text-base text-gray-600">Manage your account information</p>
-      </div>
-
-      {/* Profile Card */}
-      <GlassCard>
-        {/* Profile Avatar & Role */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-white/20">
-          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-            <div className="w-14 sm:w-16 h-14 sm:h-16 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center text-xl sm:text-2xl font-bold">
-              {profile.name && profile.name[0].toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{profile.name}</h2>
-              <p className="text-xs sm:text-base text-gray-600 mt-0.5">
-                {profile.role === 'ADMIN' && '👑 Administrator'}
-                {profile.role === 'BARBER' && '✂️ Barber'}
-                {profile.role === 'CUSTOMER' && '👤 Customer'}
-              </p>
-            </div>
-          </div>
-          {!isEditing && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              className="w-full sm:w-auto"
-            >
-              ✏️ Edit
-            </Button>
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 p-4 pb-12">
+      <div className="max-w-md mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-h2 font-bold text-neutral-900">My Profile</h1>
+          <p className="text-body-small text-neutral-600 mt-1">Manage your account information</p>
         </div>
 
-        {/* Profile Information */}
-        {!isEditing ? (
-          <div className="space-y-4 sm:space-y-6">
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <p className="text-base sm:text-lg text-gray-900">{profile.name}</p>
-            </div>
+        {/* Profile Card */}
+        <Card shadow="lg" className="space-y-6">
+          <CardHeader>
+            <CardTitle>Account Information</CardTitle>
+          </CardHeader>
 
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                Phone Number
-              </label>
-              <p className="text-base sm:text-lg text-gray-900">{profile.phone}</p>
-            </div>
+          <CardBody className="space-y-4">
+            {isEditing ? (
+              <>
+                {/* Edit Mode */}
+                <Input
+                  label="Full Name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  error={errors.name}
+                  size="md"
+                />
 
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <div className={`inline-block px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
-                profile.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
-                profile.role === 'BARBER' ? 'bg-blue-100 text-blue-700' :
-                'bg-gray-100 text-gray-700'
-              }`}>
-                {profile.role}
-              </div>
-            </div>
+                <Input
+                  label="Phone Number"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  error={errors.phone}
+                  disabled
+                  hint="Phone number cannot be changed"
+                  size="md"
+                />
+              </>
+            ) : (
+              <>
+                {/* View Mode */}
+                <div className="space-y-1">
+                  <p className="text-label font-semibold text-neutral-700">Full Name</p>
+                  <p className="text-body text-neutral-900 font-medium">{profile.name}</p>
+                </div>
 
-            {profile.shop && (
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  Associated Shop
-                </label>
-                <p className="text-base sm:text-lg text-gray-900">{profile.shop.name || 'Shop'}</p>
-              </div>
+                <div className="space-y-1">
+                  <p className="text-label font-semibold text-neutral-700">Phone Number</p>
+                  <p className="text-body text-neutral-900 font-medium">{profile.phone}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-label font-semibold text-neutral-700">Account Type</p>
+                  <Badge variant="primary">
+                    {profile.role === 'CUSTOMER' ? '👤 Customer' : profile.role === 'BARBER' ? '💇 Barber' : '⚙️ Admin'}
+                  </Badge>
+                </div>
+
+                {profile.genderPreference && (
+                  <div className="space-y-1">
+                    <p className="text-label font-semibold text-neutral-700">Preference</p>
+                    <Badge variant="secondary">
+                      {profile.genderPreference === 'MALE' ? '👨 Male Barber Shops' : profile.genderPreference === 'FEMALE' ? '👩 Female Salons' : '👥 All Salons'}
+                    </Badge>
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <p className="text-label font-semibold text-neutral-700">Member Since</p>
+                  <p className="text-body-small text-neutral-600">
+                    {new Date(profile.createdAt).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+              </>
             )}
-          </div>
-        ) : (
-          // Edit Mode
-          <div className="space-y-3 sm:space-y-5">
-            <Input
-              label="Full Name"
-              value={formData.name}
-              onChange={(e) => {
-                setFormData({ ...formData, name: e.target.value });
-                if (errors.name) setErrors({ ...errors, name: null });
-              }}
-              error={errors.name}
-              required
-              disabled={isSaving}
-            />
+          </CardBody>
 
-            <Input
-              label="Phone Number"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => {
-                setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) });
-                if (errors.phone) setErrors({ ...errors, phone: null });
-              }}
-              error={errors.phone}
-              required
-              maxLength={10}
-              disabled={isSaving}
-            />
+          <CardFooter>
+            {isEditing ? (
+              <div className="flex gap-2 w-full">
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  loading={isSaving}
+                  onClick={handleSave}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Profile
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
 
-            <p className="text-xs sm:text-sm text-gray-500">
-              ℹ️ Role cannot be changed. Contact support if needed.
-            </p>
-          </div>
-        )}
+        {/* Preferences Card */}
+        <Card shadow="lg" className="space-y-4">
+          <CardHeader>
+            <CardTitle>Preferences</CardTitle>
+          </CardHeader>
 
-        {/* Action Buttons */}
-        {isEditing && (
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/20">
-            <Button
-              variant="ghost"
-              fullWidth
-              onClick={handleCancel}
-              disabled={isSaving}
-            >
-              Cancel
-            </Button>
-            <Button
-              fullWidth
-              onClick={handleSave}
-              loading={isSaving}
-              disabled={isSaving}
-              icon="💾"
-            >
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        )}
-      </GlassCard>
-
-      {/* Additional Info Section */}
-      <div className="mt-8 grid md:grid-cols-2 gap-6">
-        {/* Account Info */}
-        <GlassCard title="Account Information" variant="subtle">
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">User ID</span>
-              <span className="font-mono text-gray-900">{profile.id?.slice(-8) || 'N/A'}</span>
+          <CardBody className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-neutral-900">Email Notifications</p>
+                <p className="text-body-small text-neutral-600">Get updates about bookings</p>
+              </div>
+              <input type="checkbox" defaultChecked className="w-5 h-5 rounded" />
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Account Type</span>
-              <span className="font-semibold text-gray-900">{profile.role}</span>
-            </div>
-          </div>
-        </GlassCard>
 
-        {/* Quick Actions */}
-        <GlassCard title="Quick Actions" variant="subtle">
-          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-neutral-900">SMS Notifications</p>
+                <p className="text-body-small text-neutral-600">Receive SMS reminders</p>
+              </div>
+              <input type="checkbox" defaultChecked className="w-5 h-5 rounded" />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-neutral-900">Marketing Updates</p>
+                <p className="text-body-small text-neutral-600">Learn about promotions</p>
+              </div>
+              <input type="checkbox" className="w-5 h-5 rounded" />
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Logout Card */}
+        <Card shadow="lg">
+          <CardBody className="text-center space-y-4">
+            <p className="text-body-small text-neutral-600">Want to switch accounts?</p>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="danger"
               fullWidth
-              onClick={() => navigate('/my-bookings')}
-              className="justify-start"
+              onClick={() => {
+                localStorage.clear();
+                navigate('/login');
+              }}
             >
-              📅 View My Bookings
+              Sign Out
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              fullWidth
-              onClick={() => navigate('/notifications')}
-              className="justify-start"
-            >
-              🔔 Notifications
-            </Button>
-          </div>
-        </GlassCard>
+          </CardBody>
+        </Card>
       </div>
     </div>
+  );
+}
   );
 }
