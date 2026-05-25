@@ -17,7 +17,7 @@ app.use(helmet({
     frameguard: { action: 'deny' }, // Prevent clickjacking
     noSniff: true, // Prevent MIME type sniffing
     xssFilter: true, // Enable XSS filter
-    hsts: { 
+    hsts: {
         maxAge: 31536000, // 1 year
         includeSubDomains: true,
         preload: true

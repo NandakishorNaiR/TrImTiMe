@@ -18,7 +18,7 @@ const globalLimiter = rateLimit({
 
 /**
  * Strict limiter for authentication endpoints
- * 5 requests per 15 minutes per IP (prevents brute force)
+ * 5 requests per 15 minutes per phone (prevents brute force per account)
  */
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -27,8 +27,9 @@ const authLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => {
-        // Use user email as key if provided (additional protection)
-        return (req.body && req.body.email) || req.ip;
+        // Rate limit by phone number (per account) instead of IP
+        // This allows multiple users on same network but prevents account brute force
+        return (req.body && req.body.phone) || req.ip;
     }
 });
 

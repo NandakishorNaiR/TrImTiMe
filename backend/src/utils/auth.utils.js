@@ -54,7 +54,7 @@ const extractTokenFromHeader = (authHeader) => {
  */
 const getClientIP = (req) => {
     return (
-        req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+        req.headers['x-forwarded-for'] ? .split(',')[0].trim() ||
         req.headers['x-real-ip'] ||
         req.ip ||
         req.connection.remoteAddress ||
@@ -73,7 +73,7 @@ const getUserAgent = (req) => {
  * Check if too many failed login attempts (brute force protection)
  * Returns { blocked: boolean, attemptsCount: number, lockoutUntil: Date|null }
  */
-const checkLoginAttempts = async (phone, ipAddress, maxAttempts = 5, lockoutDurationMinutes = 15) => {
+const checkLoginAttempts = async(phone, ipAddress, maxAttempts = 5, lockoutDurationMinutes = 15) => {
     const LoginAttempt = require('../models/LoginAttempt.model');
     const now = new Date();
     const lockoutStart = new Date(now.getTime() - lockoutDurationMinutes * 60 * 1000);
@@ -105,7 +105,7 @@ const checkLoginAttempts = async (phone, ipAddress, maxAttempts = 5, lockoutDura
 /**
  * Record a login attempt
  */
-const recordLoginAttempt = async (phone, ipAddress, successful, failureReason = null) => {
+const recordLoginAttempt = async(phone, ipAddress, successful, failureReason = null) => {
     const LoginAttempt = require('../models/LoginAttempt.model');
     return LoginAttempt.create({
         phone,
@@ -119,12 +119,12 @@ const recordLoginAttempt = async (phone, ipAddress, successful, failureReason = 
 /**
  * Create a new session
  */
-const createSession = async (userId, deviceFingerprint, userAgent, ipAddress, token) => {
+const createSession = async(userId, deviceFingerprint, userAgent, ipAddress, token) => {
     const Session = require('../models/Session.model');
-    
+
     // Hash the token before storing (security best practice)
     const tokenHash = hashToken(token);
-    
+
     return Session.create({
         userId,
         deviceFingerprint,
@@ -141,9 +141,9 @@ const createSession = async (userId, deviceFingerprint, userAgent, ipAddress, to
 /**
  * Validate session exists and is active
  */
-const validateSession = async (userId, deviceFingerprint) => {
+const validateSession = async(userId, deviceFingerprint) => {
     const Session = require('../models/Session.model');
-    
+
     const session = await Session.findOne({
         userId,
         deviceFingerprint,
@@ -157,41 +157,32 @@ const validateSession = async (userId, deviceFingerprint) => {
 /**
  * Update session activity
  */
-const updateSessionActivity = async (userId, deviceFingerprint) => {
+const updateSessionActivity = async(userId, deviceFingerprint) => {
     const Session = require('../models/Session.model');
-    
-    return Session.updateOne(
-        { userId, deviceFingerprint, active: true },
-        { lastActivityAt: new Date() }
-    );
+
+    return Session.updateOne({ userId, deviceFingerprint, active: true }, { lastActivityAt: new Date() });
 };
 
 /**
  * Invalidate all sessions for a user (force logout everywhere)
  */
-const invalidateAllSessions = async (userId) => {
+const invalidateAllSessions = async(userId) => {
     const Session = require('../models/Session.model');
-    return Session.updateMany(
-        { userId },
-        { active: false }
-    );
+    return Session.updateMany({ userId }, { active: false });
 };
 
 /**
  * Invalidate single session
  */
-const invalidateSession = async (userId, deviceFingerprint) => {
+const invalidateSession = async(userId, deviceFingerprint) => {
     const Session = require('../models/Session.model');
-    return Session.updateOne(
-        { userId, deviceFingerprint },
-        { active: false }
-    );
+    return Session.updateOne({ userId, deviceFingerprint }, { active: false });
 };
 
 /**
  * Get all active sessions for a user
  */
-const getActiveSessions = async (userId) => {
+const getActiveSessions = async(userId) => {
     const Session = require('../models/Session.model');
     return Session.find({
         userId,

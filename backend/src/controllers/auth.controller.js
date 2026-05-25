@@ -44,7 +44,7 @@ exports.login = async(req, res) => {
 
         const ipAddress = getClientIP(req);
         const userAgent = getUserAgent(req);
-        
+
         console.log('login attempt:', { phone, name, role, hasGenderPref: !!genderPreference, ipAddress });
 
         // ✅ SECURITY: Check for account lockout (brute force protection)
@@ -52,7 +52,7 @@ exports.login = async(req, res) => {
         if (attemptCheck.blocked) {
             await recordLoginAttempt(phone, ipAddress, false, 'account_locked');
             const waitMinutes = Math.ceil((attemptCheck.lockoutUntil - new Date()) / 60000);
-            return res.status(429).json({ 
+            return res.status(429).json({
                 message: `Too many login attempts. Please try again in ${waitMinutes} minutes.`,
                 lockoutUntil: attemptCheck.lockoutUntil
             });
@@ -165,7 +165,7 @@ exports.me = async(req, res) => {
         const userAgent = getUserAgent(req);
         const ipAddress = getClientIP(req);
         const deviceFingerprint = generateDeviceFingerprint(userAgent, ipAddress);
-        
+
         const sessionValid = await validateSession(userId, deviceFingerprint);
         if (!sessionValid) {
             return res.status(401).json({ message: 'Invalid session. Please login again.' });
@@ -275,7 +275,7 @@ exports.logout = async(req, res) => {
 
         // Invalidate this specific session
         await invalidateSession(userId, deviceFingerprint);
-        
+
         console.log('user logged out:', userId, 'device:', deviceFingerprint);
 
         return res.json({ message: 'Logged out successfully' });
@@ -293,7 +293,7 @@ exports.logoutAll = async(req, res) => {
 
         // Invalidate all sessions for this user
         await invalidateAllSessions(userId);
-        
+
         console.log('user logged out from all devices:', userId);
 
         return res.json({ message: 'Logged out from all devices successfully' });

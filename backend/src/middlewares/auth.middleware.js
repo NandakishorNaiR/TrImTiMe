@@ -22,7 +22,7 @@ const requireAuth = (roles = []) => {
             const userAgent = getUserAgent(req);
             const ipAddress = getClientIP(req);
             const deviceFingerprint = generateDeviceFingerprint(userAgent, ipAddress);
-            
+
             const sessionValid = await validateSession(payload.id, deviceFingerprint);
             if (!sessionValid) {
                 return res.status(401).json({ message: 'Invalid session. Please login again.' });
