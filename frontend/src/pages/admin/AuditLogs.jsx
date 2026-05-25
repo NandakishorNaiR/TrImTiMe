@@ -1,6 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { getAuditLogs } from '../../api/admin.api';
-import GlassCard from '../../components/ui/GlassCard';
+import { Card, CardHeader, CardTitle, CardBody } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 
 const AuditLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -51,72 +54,179 @@ const AuditLogs = () => {
 
   useEffect(() => { setPage(1); }, [query, roleFilter, startDate, endDate, limit]);
 
-  return (
-    <div className="p-4 max-w-6xl mx-auto">
-      <h1 className="text-xl font-semibold mb-4">Audit Logs</h1>
-
-      <div className="flex gap-3 mb-4 items-end">
-        <div>
-          <label className="text-xs text-gray-500">Search</label>
-          <input className="block mt-1 px-2 py-1 border rounded" placeholder="Action, entity or metadata" value={query} onChange={e => setQuery(e.target.value)} />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500">Actor</label>
-          <select className="block mt-1 px-2 py-1 border rounded" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
-            <option value="ALL">All</option>
-            <option value="ADMIN">Admin</option>
-            <option value="BARBER">Barber</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-xs text-gray-500">Start</label>
-          <input type="date" className="block mt-1 px-2 py-1 border rounded" value={startDate} onChange={e => setStartDate(e.target.value)} />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500">End</label>
-          <input type="date" className="block mt-1 px-2 py-1 border rounded" value={endDate} onChange={e => setEndDate(e.target.value)} />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500">Per page</label>
-          <select className="block mt-1 px-2 py-1 border rounded" value={limit} onChange={e => setLimit(Number(e.target.value))}>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="text-4xl animate-spin">⏳</div>
+          <p className="text-body text-neutral-600">Loading audit logs…</p>
         </div>
       </div>
+    );
+  }
 
-      {loading ? (
-        <GlassCard><p className="text-sm text-gray-500">Loading...</p></GlassCard>
-      ) : pageItems.length === 0 ? (
-        <GlassCard><p className="text-sm text-gray-500">No audit logs</p></GlassCard>
-      ) : (
-        pageItems.map(l => (
-          <GlassCard key={l._id} className="mb-2">
-            <div className="flex justify-between">
-              <div>
-                <div className="font-medium">{l.action}</div>
-                <div className="text-xs text-gray-500">{l.entity} • {l.entityId || '—'}</div>
-                <div className="text-xs text-gray-500 mt-1">{JSON.stringify(l.metadata || {})}</div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 p-4 pb-12">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-h2 font-bold text-neutral-900">📋 Audit Logs</h1>
+          <p className="text-body-small text-neutral-600 mt-1">Track all system activities and user actions</p>
+        </div>
+
+        {/* Filters */}
+        <Card shadow="lg">
+          <CardBody className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div className="md:col-span-2">
+                <Input
+                  label="Search"
+                  placeholder="Action, entity, or data"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                />
               </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-500">{l.actorRole}</div>
-                <div className="text-xs text-gray-500">{new Date(l.createdAt).toLocaleString()}</div>
+
+              <div>
+                <label className="text-label font-semibold text-neutral-700 block mb-2">Actor</label>
+                <select
+                  value={roleFilter}
+                  onChange={e => setRoleFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="ALL">All</option>
+                  <option value="ADMIN">👤 Admin</option>
+                  <option value="BARBER">✂️ Barber</option>
+                </select>
+              </div>
+
+              <div>
+                <Input
+                  label="Start Date"
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Input
+                  label="End Date"
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="text-label font-semibold text-neutral-700 block mb-2">Per Page</label>
+                <select
+                  value={limit}
+                  onChange={e => setLimit(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
               </div>
             </div>
-          </GlassCard>
-        ))
-      )}
 
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center gap-2">
-          <button className="px-3 py-1 border rounded" onClick={() => setPage(p => Math.max(1, p-1))} disabled={page <= 1}>Prev</button>
-          <button className="px-3 py-1 border rounded" onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page >= totalPages}>Next</button>
-          <span className="text-sm text-gray-600">Page</span>
-          <input type="number" min={1} className="w-16 px-2 py-1 border rounded" value={page} onChange={(e) => setPage(Math.min(totalPages, Math.max(1, Number(e.target.value) || 1)))} />
-          <span className="text-sm text-gray-600">of {totalPages}</span>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setQuery('');
+                  setRoleFilter('ALL');
+                  setStartDate('');
+                  setEndDate('');
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Logs List */}
+        {pageItems.length === 0 ? (
+          <Card shadow="lg" className="text-center py-12">
+            <CardBody>
+              <p className="text-5xl mb-3">✓</p>
+              <p className="text-body text-neutral-700 font-medium">
+                {total === 0 ? 'No audit logs found' : 'No results for this filter'}
+              </p>
+              {total === 0 && (
+                <p className="text-body-small text-neutral-600 mt-1">Activity logs will appear as actions are performed in the system</p>
+              )}
+            </CardBody>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {pageItems.map(l => (
+              <Card key={l._id} shadow="md" className="border-l-4 border-l-primary-500 hover:shadow-lg transition-shadow">
+                <CardBody className="space-y-3">
+                  <div className="flex items-start justify-between flex-wrap gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-h5 font-bold text-neutral-900 break-words">{l.action}</p>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <Badge variant="secondary">{l.entity}</Badge>
+                        {l.entityId && (
+                          <span className="text-body-small text-neutral-600 font-mono">ID: {l.entityId}</span>
+                        )}
+                      </div>
+                      {l.metadata && Object.keys(l.metadata).length > 0 && (
+                        <div className="mt-2 p-2 bg-neutral-100 rounded text-body-small text-neutral-700 font-mono max-h-20 overflow-auto">
+                          {JSON.stringify(l.metadata, null, 2)}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-right">
+                      <Badge variant={l.actorRole === 'ADMIN' ? 'primary' : 'secondary'}>
+                        {l.actorRole}
+                      </Badge>
+                      <p className="text-caption text-neutral-600 mt-2">
+                        {new Date(l.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-neutral-200">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1}
+            >
+              ← Prev
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+            >
+              Next →
+            </Button>
+            <span className="text-body-small text-neutral-600 ml-2">Page</span>
+            <input
+              type="number"
+              min={1}
+              max={totalPages}
+              value={page}
+              onChange={(e) => setPage(Math.min(totalPages, Math.max(1, Number(e.target.value) || 1)))}
+              className="w-16 px-2 py-1 border border-neutral-300 rounded text-center"
+            />
+            <span className="text-body-small text-neutral-600">of {totalPages}</span>
+          </div>
+          <span className="text-body-small text-neutral-600">Total: {total}</span>
         </div>
-        <div className="text-sm text-gray-600">Total: {total}</div>
       </div>
     </div>
   );

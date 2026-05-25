@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from "react";
-import DashboardButton from '../../components/ui/DashboardButton';
-import Sparkline from '../../components/ui/Sparkline';
 import { formatCurrency } from '../../utils/format';
 import { getSettlements, markSettlementPaid, getDashboardStats, getShopStats, getAllShops, toggleShopAcceptCOD, deleteShop, deleteUser, cancelBooking, getClosures, getAuditLogs, getPlatformRevenue, getPlatformRevenueSeries, refundBooking, flagBooking, setUserCODRestriction, approveClosure, rejectClosure } from "../../api/admin.api";
 import { getAllBookings } from "../../api/admin.api";
 import SettlementRow from "../../components/admin/SettlementRow";
-import GlassCard from "../../components/ui/GlassCard";
-// sparkline/format removed from this view; only closures & audit logs are needed here
+import { Card, CardHeader, CardTitle, CardBody, CardFooter } from "../../components/ui/Card";
+import { Badge } from "../../components/ui/Badge";
+import { Button } from "../../components/ui/Button";
+import { Alert } from "../../components/ui/Alert";
 
 const AdminDashboard = () => {
   const [settlements, setSettlements] = useState([]);
@@ -360,239 +360,455 @@ const AdminDashboard = () => {
   const displayedBookings = showHistory ? bookingsSorted : activeBookings;
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-
-      {/* Core KPI cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <GlassCard title="Customers">
-          <p className="text-3xl font-bold">{stats ? stats.customers : '—'}</p>
-        </GlassCard>
-
-        <GlassCard title="Barbers">
-          <p className="text-3xl font-bold">{stats ? stats.barbers : '—'}</p>
-        </GlassCard>
-
-        <GlassCard title="Shops">
-          <p className="text-3xl font-bold">{stats ? stats.shops : '—'}</p>
-        </GlassCard>
-
-        <GlassCard title="Bookings">
-          <p className="text-3xl font-bold">{stats ? stats.bookings : '—'}</p>
-        </GlassCard>
-      </div>
-
-      {/* Financial summary for admins */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <GlassCard title="Total Collected"><div className="text-2xl font-bold">{formatCurrency(stats.totalOnline || 0)}</div></GlassCard>
-          <GlassCard title="Platform Earnings"><div className="text-2xl font-bold">{formatCurrency(stats.platformEarnings || 0)}</div></GlassCard>
-          <GlassCard title="COD Due"><div className="text-2xl font-bold text-red-600">{formatCurrency(stats.codDue || 0)}</div></GlassCard>
-          <GlassCard title="Net Payout"><div className="text-2xl font-bold">{formatCurrency(stats.netPayout || 0)}</div></GlassCard>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 p-4 pb-12">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-h2 font-bold text-neutral-900">⚙️ Admin Dashboard</h1>
+          <p className="text-body-small text-neutral-600 mt-1">Manage platform operations, settlements, and compliance</p>
         </div>
-      )}
 
-      <div className="flex gap-3 mb-4">
-        <DashboardButton to="/admin/closures" ariaLabel="Open Closures">Closures</DashboardButton>
-        <DashboardButton to="/admin/audit-logs" ariaLabel="Open Audit Logs" variant="outline">Audit Logs</DashboardButton>
-      </div>
+        {/* KPI Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card shadow="lg">
+              <CardBody className="space-y-2">
+                <p className="text-label font-semibold text-neutral-600">Total Customers</p>
+                <p className="text-h3 font-bold text-primary-700">{stats.customers || 0}</p>
+              </CardBody>
+            </Card>
 
-      {/* Closures & Audit Logs snapshot */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <GlassCard title={`Recent Closures (${closuresList.length})`}>
-          {closuresList.length === 0 ? <p className="text-sm text-gray-500">No closures</p> : (
-            <ul className="text-sm space-y-2">
-              {closuresList.slice(0,5).map(c => (
-                <li key={c._id} className="flex justify-between items-start">
-                  <div>
-                    <div className="font-medium">{c.shop?.name || c.shop}</div>
-                    <div className="text-xs text-gray-500">{c.date} • {c.reason || '—'}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-xs text-gray-500 mr-2">{c.status}</div>
-                    {c.status === 'PENDING' && (
-                      <>
-                        <button className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded" onClick={() => handleApproveClosure(c._id)}>Approve</button>
-                        <button className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded" onClick={() => handleRejectClosure(c._id)}>Reject</button>
-                      </>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </GlassCard>
+            <Card shadow="lg">
+              <CardBody className="space-y-2">
+                <p className="text-label font-semibold text-neutral-600">Total Barbers</p>
+                <p className="text-h3 font-bold text-secondary-700">{stats.barbers || 0}</p>
+              </CardBody>
+            </Card>
 
-        <GlassCard title={`Audit Logs (${auditLogs.length})`}>
-          {auditLogs.length === 0 ? <p className="text-sm text-gray-500">No logs</p> : (
-            <ul className="text-xs space-y-2 max-h-40 overflow-auto">
-              {auditLogs.slice(0,10).map(l => (
-                <li key={l._id} className="border-b pb-1">
-                  <div className="font-medium">{l.action}</div>
-                  <div className="text-gray-500">{new Date(l.createdAt).toLocaleString()} • {l.actorRole}</div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </GlassCard>
-      </div>
+            <Card shadow="lg">
+              <CardBody className="space-y-2">
+                <p className="text-label font-semibold text-neutral-600">Total Shops</p>
+                <p className="text-h3 font-bold text-accent-700">{stats.shops || 0}</p>
+              </CardBody>
+            </Card>
 
-      {/* Settlement list */}
-      <div className="space-y-4">
-        {loading ? (
-          <GlassCard><p className="text-gray-500 text-sm">Loading...</p></GlassCard>
-        ) : settlements.length === 0 ? (
-          <GlassCard><p className="text-gray-500 text-sm">No settlements yet</p></GlassCard>
-        ) : (
-          settlements.map((s) => (
-            <GlassCard key={s._id} className="p-0">
-              <SettlementRow settlement={s} onPaid={handlePaid} />
-            </GlassCard>
-          ))
+            <Card shadow="lg">
+              <CardBody className="space-y-2">
+                <p className="text-label font-semibold text-neutral-600">Total Bookings</p>
+                <p className="text-h3 font-bold text-info-700">{stats.bookings || 0}</p>
+              </CardBody>
+            </Card>
+          </div>
         )}
-      </div>
 
-      {/* Shops & revenue */}
-      <div>
-        <h2 className="text-lg font-semibold mt-6 mb-3">Shops & Revenue</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {shops.length === 0 ? (
-            <GlassCard><p className="text-sm text-gray-500">No shops yet</p></GlassCard>
-          ) : shops.map(s => (
-            <GlassCard key={s.shopId} title={s.shopName || 'Unnamed Shop'}>
-              <p className="text-sm">Bookings: {s.bookings || 0}</p>
-              <p className="text-lg font-semibold mt-2">₹{s.totalRevenue || 0}</p>
-              <div className="flex flex-col gap-2 mt-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm">Accept COD: <span className="font-medium">{(fullShops.find(f => f._id === s.shopId) || {}).acceptCOD ? 'Yes' : 'No'}</span></div>
-                  <button className="px-3 py-1 border rounded text-sm" onClick={() => handleToggleAcceptCOD(s.shopId, (fullShops.find(f => f._id === s.shopId) || {}).acceptCOD)}>
-                    Toggle COD
-                  </button>
+        {/* Financial Summary Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card shadow="lg">
+              <CardBody>
+                <p className="text-label font-semibold text-neutral-600 mb-2">Total Collected</p>
+                <p className="text-h4 font-bold text-primary-700">{formatCurrency(stats.totalOnline || 0)}</p>
+              </CardBody>
+            </Card>
+
+            <Card shadow="lg">
+              <CardBody>
+                <p className="text-label font-semibold text-neutral-600 mb-2">Platform Earnings</p>
+                <p className="text-h4 font-bold text-success-700">{formatCurrency(stats.platformEarnings || 0)}</p>
+              </CardBody>
+            </Card>
+
+            <Card shadow="lg">
+              <CardBody>
+                <p className="text-label font-semibold text-neutral-600 mb-2">COD Due</p>
+                <p className="text-h4 font-bold text-danger-700">{formatCurrency(stats.codDue || 0)}</p>
+              </CardBody>
+            </Card>
+
+            <Card shadow="lg">
+              <CardBody>
+                <p className="text-label font-semibold text-neutral-600 mb-2">Net Payout</p>
+                <p className="text-h4 font-bold text-accent-700">{formatCurrency(stats.netPayout || 0)}</p>
+              </CardBody>
+            </Card>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <Button
+            variant="primary"
+            onClick={() => window.location.href = '/admin/closures'}
+          >
+            📋 Closures
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => window.location.href = '/admin/audit-logs'}
+          >
+            📝 Audit Logs
+          </Button>
+        </div>
+
+        {/* Closures & Audit Logs */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Recent Closures */}
+          <Card shadow="lg">
+            <CardHeader className="bg-gradient-to-r from-warning-500 to-danger-500 text-white rounded-t-xl">
+              <CardTitle>Recent Closures ({closuresList.length})</CardTitle>
+            </CardHeader>
+
+            <CardBody>
+              {closuresList.length === 0 ? (
+                <p className="text-body-small text-neutral-600">No closures</p>
+              ) : (
+                <div className="space-y-2">
+                  {closuresList.slice(0, 5).map(c => (
+                    <div key={c._id} className="border-b border-neutral-200 pb-2 last:border-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium text-neutral-900">{c.shop?.name || 'Unknown'}</p>
+                          <p className="text-caption text-neutral-600 mt-1">{new Date(c.date).toLocaleDateString()} • {c.reason || '—'}</p>
+                        </div>
+                        <Badge variant={
+                          c.status === 'PENDING' ? 'warning' :
+                          c.status === 'APPROVED' ? 'success' : 'danger'
+                        }>
+                          {c.status}
+                        </Badge>
+                      </div>
+                      {c.status === 'PENDING' && (
+                        <div className="flex gap-2 mt-2">
+                          <Button size="sm" variant="success" onClick={() => handleApproveClosure(c._id)}>Approve</Button>
+                          <Button size="sm" variant="danger" onClick={() => handleRejectClosure(c._id)}>Reject</Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div className="flex gap-2">
-                  <button className="px-3 py-1 bg-red-600 text-white rounded text-sm" onClick={() => handleDeleteShop(s.shopId)} disabled={deletingShopId === s.shopId}>{deletingShopId === s.shopId ? 'Deleting...' : 'Delete Shop'}</button>
+              )}
+            </CardBody>
+          </Card>
+
+          {/* Recent Audit Logs */}
+          <Card shadow="lg">
+            <CardHeader className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-t-xl">
+              <CardTitle>Recent Activity ({auditLogs.length})</CardTitle>
+            </CardHeader>
+
+            <CardBody>
+              {auditLogs.length === 0 ? (
+                <p className="text-body-small text-neutral-600">No activity logs</p>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-auto">
+                  {auditLogs.slice(0, 8).map(l => (
+                    <div key={l._id} className="border-b border-neutral-200 pb-2 last:border-0">
+                      <p className="font-medium text-neutral-900 text-sm">{l.action}</p>
+                      <p className="text-caption text-neutral-600">
+                        {l.actorRole} • {new Date(l.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            </GlassCard>
-          ))}
+              )}
+            </CardBody>
+          </Card>
         </div>
-      </div>
 
-      {/* Recent Bookings */}
-      <div>
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold mt-6 mb-3">Recent Bookings</h2>
-            <div className="flex items-center gap-3">
-              <button className="text-sm px-3 py-1 border rounded" onClick={() => { const nv = !showHistory; setShowHistory(nv); setBookingsPage(1); loadBookings({ page: 1, showHistory: nv }); }}>{showHistory ? 'Hide History' : 'Show History'}</button>
-            </div>
-        </div>
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 items-end mb-4">
-          <div>
-            <label className="text-xs text-gray-500">Status</label>
-            <select className="block mt-1 px-2 py-1 border rounded" value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setBookingsPage(1); loadBookings({ page: 1, status: e.target.value }); }}>
-              <option value="all">All</option>
-              <option value="booked">Booked</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500">Shop</label>
-            <select className="block mt-1 px-2 py-1 border rounded" value={filterShop} onChange={(e) => { setFilterShop(e.target.value); setBookingsPage(1); loadBookings({ page: 1, shopId: e.target.value }); }}>
-              <option value="">All shops</option>
-              {shops.map(s => <option key={s.shopId} value={s.shopId}>{s.shopName || s.shopId}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500">Phone</label>
-            <input className="block mt-1 px-2 py-1 border rounded" placeholder="User phone" value={filterUserPhone} onChange={(e) => { setFilterUserPhone(e.target.value); }} onBlur={() => { setBookingsPage(1); loadBookings({ page: 1, userPhone: filterUserPhone }); }} />
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500">Start</label>
-            <input type="date" className="block mt-1 px-2 py-1 border rounded" value={filterStartDate} onChange={(e) => { setFilterStartDate(e.target.value); setBookingsPage(1); loadBookings({ page: 1, startDate: e.target.value }); }} />
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500">End</label>
-            <input type="date" className="block mt-1 px-2 py-1 border rounded" value={filterEndDate} onChange={(e) => { setFilterEndDate(e.target.value); setBookingsPage(1); loadBookings({ page: 1, endDate: e.target.value }); }} />
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500">Per page</label>
-            <select className="block mt-1 px-2 py-1 border rounded" value={bookingsLimit} onChange={(e) => { const l = Number(e.target.value); setBookingsLimit(l); setBookingsPage(1); loadBookings({ page: 1, limit: l }); }}>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
-        </div>
+        {/* Settlements */}
         <div className="space-y-3">
-          {displayedBookings.length === 0 ? (
-            <GlassCard><p className="text-sm text-gray-500">No bookings</p></GlassCard>
+          <h2 className="text-h5 font-bold text-neutral-900">💰 Settlements</h2>
+          {loading ? (
+            <Card shadow="lg">
+              <CardBody className="text-center py-8">
+                <p className="text-body text-neutral-600">Loading settlements…</p>
+              </CardBody>
+            </Card>
+          ) : settlements.length === 0 ? (
+            <Card shadow="lg">
+              <CardBody className="text-center py-8">
+                <p className="text-5xl mb-3">📋</p>
+                <p className="text-body text-neutral-700">No settlements yet</p>
+              </CardBody>
+            </Card>
           ) : (
-            displayedBookings.map(b => (
-              <GlassCard key={b._id} className="flex justify-between items-center">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold">{b.userId?.name || b.memberName || 'Unknown'}</p>
-                    <span className={`text-xs px-2 py-1 rounded font-semibold ${
-                      b.source === 'OFFLINE' 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {b.source === 'OFFLINE' ? '📱 OFFLINE' : '📲 APP'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500">{b.shopId?.name || '—'} • {new Date(b.slotStart).toLocaleString()}</p>
-                  <p className="text-sm mt-1">{(b.services || []).map(s => s.name).join(', ')}</p>
-                  {showHistory && <p className="text-xs mt-1">Status: <span className="font-medium">{b.status}</span></p>}
-                </div>
-                <div className="flex flex-col items-end">
-                  <p className="font-semibold">₹{b.totalAmount || (b.payment && b.payment.amountPaid) || 0}</p>
-                  <div className="flex gap-2 mt-2">
-                    {/* Cancel button: show for active bookings */}
-                    {['booked','in_progress'].includes(b.status) && (
-                      <button className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded" onClick={() => handleCancelBooking(b._id)} disabled={cancellingBookingIds.has(b._id)}>{cancellingBookingIds.has(b._id) ? 'Cancelling...' : 'Cancel'}</button>
-                    )}
-
-                    {/* Refund: only for ONLINE bookings and not already refunded */}
-                    {b.paymentMethod === 'ONLINE' && b.status !== 'refunded' && (
-                      <button className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded" onClick={() => handleAdminRefund(b._id)}>
-                        Refund
-                      </button>
-                    )}
-
-                    {/* Flag: internal use */}
-                    {!b.flagged && (
-                      <button className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded" onClick={() => handleAdminFlag(b._id)}>
-                        Flag
-                      </button>
-                    )}
-
-                    <button className="px-3 py-1 border rounded text-sm" onClick={() => handleToggleUserCOD(b.userId?._id || b.userId)}>
-                      { (b.userId && b.userId.codRestrictedUntil && new Date(b.userId.codRestrictedUntil) > new Date()) ? 'Allow COD' : 'Restrict COD' }
-                    </button>
-                    <button className="px-3 py-1 bg-gray-200 text-sm" onClick={() => handleDeleteUser(b.userId?._id || b.userId)} disabled={deletingUserIds.has(b.userId?._id || b.userId)}>{deletingUserIds.has(b.userId?._id || b.userId) ? 'Deleting...' : 'Delete User'}</button>
-                  </div>
-                </div>
-              </GlassCard>
-            ))
-          )}
-          {/* Pagination controls */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-1 border rounded" onClick={handlePrev} disabled={bookingsPage <= 1}>Prev</button>
-              <button className="px-3 py-1 border rounded" onClick={handleNext} disabled={bookingsPage >= getTotalPages()}>Next</button>
-              <span className="text-sm text-gray-600">Page</span>
-              <input type="number" min={1} className="w-16 px-2 py-1 border rounded" value={bookingsPage} onChange={(e) => handlePageInputChange(e.target.value)} onBlur={handlePageInputBlur} />
-              <span className="text-sm text-gray-600">of {getTotalPages()}</span>
+            <div className="space-y-2">
+              {settlements.slice(0, 10).map((s) => (
+                <Card key={s._id} shadow="md">
+                  <CardBody className="p-0">
+                    <SettlementRow settlement={s} onPaid={handlePaid} />
+                  </CardBody>
+                </Card>
+              ))}
             </div>
-            <div className="text-sm text-gray-600">Total: {bookingsTotal}</div>
+          )}
+        </div>
+
+        {/* Shops & Revenue */}
+        <div className="space-y-3">
+          <h2 className="text-h5 font-bold text-neutral-900">🏪 Shops & Revenue</h2>
+          {shops.length === 0 ? (
+            <Card shadow="lg">
+              <CardBody className="text-center py-8">
+                <p className="text-5xl mb-3">🏪</p>
+                <p className="text-body text-neutral-700">No shops yet</p>
+              </CardBody>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {shops.map(s => (
+                <Card key={s.shopId} shadow="lg">
+                  <CardHeader className="border-b border-neutral-200">
+                    <CardTitle>{s.shopName || 'Unnamed Shop'}</CardTitle>
+                  </CardHeader>
+                  <CardBody className="space-y-3">
+                    <div>
+                      <p className="text-caption text-neutral-600">Bookings</p>
+                      <p className="text-h5 font-bold text-primary-700">{s.bookings || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-caption text-neutral-600">Revenue</p>
+                      <p className="text-h4 font-bold text-accent-700">₹{s.totalRevenue || 0}</p>
+                    </div>
+                    <div className="pt-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-body-small">Accept COD:</span>
+                        <Badge variant={(fullShops.find(f => f._id === s.shopId) || {}).acceptCOD ? 'success' : 'secondary'}>
+                          {(fullShops.find(f => f._id === s.shopId) || {}).acceptCOD ? 'Yes' : 'No'}
+                        </Badge>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleToggleAcceptCOD(s.shopId, (fullShops.find(f => f._id === s.shopId) || {}).acceptCOD)}
+                      >
+                        Toggle COD
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDeleteShop(s.shopId)}
+                        disabled={deletingShopId === s.shopId}
+                      >
+                        {deletingShopId === s.shopId ? 'Deleting...' : 'Delete Shop'}
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent Bookings */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-h5 font-bold text-neutral-900">📅 Bookings</h2>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                const nv = !showHistory;
+                setShowHistory(nv);
+                setBookingsPage(1);
+                loadBookings({ page: 1, showHistory: nv });
+              }}
+            >
+              {showHistory ? 'Hide History' : 'Show History'}
+            </Button>
+          </div>
+
+          {/* Filters */}
+          <Card shadow="lg">
+            <CardBody className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-3 text-sm">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => {
+                    setFilterStatus(e.target.value);
+                    setBookingsPage(1);
+                    loadBookings({ page: 1, status: e.target.value });
+                  }}
+                  className="px-2 py-1 border border-neutral-300 rounded"
+                >
+                  <option value="all">All Status</option>
+                  <option value="booked">Booked</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+
+                <select
+                  value={filterShop}
+                  onChange={(e) => {
+                    setFilterShop(e.target.value);
+                    setBookingsPage(1);
+                    loadBookings({ page: 1, shopId: e.target.value });
+                  }}
+                  className="px-2 py-1 border border-neutral-300 rounded"
+                >
+                  <option value="">All Shops</option>
+                  {shops.map(s => (
+                    <option key={s.shopId} value={s.shopId}>{s.shopName || s.shopId}</option>
+                  ))}
+                </select>
+
+                <input
+                  type="text"
+                  placeholder="Phone"
+                  value={filterUserPhone}
+                  onChange={(e) => setFilterUserPhone(e.target.value)}
+                  onBlur={() => {
+                    setBookingsPage(1);
+                    loadBookings({ page: 1, userPhone: filterUserPhone });
+                  }}
+                  className="px-2 py-1 border border-neutral-300 rounded"
+                />
+
+                <input
+                  type="date"
+                  value={filterStartDate}
+                  onChange={(e) => {
+                    setFilterStartDate(e.target.value);
+                    setBookingsPage(1);
+                    loadBookings({ page: 1, startDate: e.target.value });
+                  }}
+                  className="px-2 py-1 border border-neutral-300 rounded"
+                />
+
+                <input
+                  type="date"
+                  value={filterEndDate}
+                  onChange={(e) => {
+                    setFilterEndDate(e.target.value);
+                    setBookingsPage(1);
+                    loadBookings({ page: 1, endDate: e.target.value });
+                  }}
+                  className="px-2 py-1 border border-neutral-300 rounded"
+                />
+
+                <select
+                  value={bookingsLimit}
+                  onChange={(e) => {
+                    const l = Number(e.target.value);
+                    setBookingsLimit(l);
+                    setBookingsPage(1);
+                    loadBookings({ page: 1, limit: l });
+                  }}
+                  className="px-2 py-1 border border-neutral-300 rounded"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Bookings List */}
+          <div className="space-y-2">
+            {displayedBookings.length === 0 ? (
+              <Card shadow="lg">
+                <CardBody className="text-center py-8">
+                  <p className="text-5xl mb-3">✓</p>
+                  <p className="text-body text-neutral-700">No bookings found</p>
+                </CardBody>
+              </Card>
+            ) : (
+              displayedBookings.map(b => (
+                <Card key={b._id} shadow="md">
+                  <CardBody>
+                    <div className="flex flex-col md:flex-row justify-between gap-4 mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <p className="font-semibold text-neutral-900">{b.userId?.name || 'Unknown'}</p>
+                          <Badge variant={b.source === 'OFFLINE' ? 'secondary' : 'primary'}>
+                            {b.source === 'OFFLINE' ? 'Offline' : 'App'}
+                          </Badge>
+                        </div>
+                        <p className="text-body-small text-neutral-600">{b.shopId?.name || '—'}</p>
+                        <p className="text-caption text-neutral-600 mt-1">{new Date(b.slotStart).toLocaleString()}</p>
+                        <p className="text-body-small text-neutral-700 mt-2">{(b.services || []).map(s => s.name).join(', ')}</p>
+                        {showHistory && <Badge variant="secondary" className="mt-2">{b.status}</Badge>}
+                      </div>
+
+                      <div className="flex-shrink-0">
+                        <p className="text-h5 font-bold text-primary-700">₹{b.totalAmount || (b.payment && b.payment.amountPaid) || 0}</p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-neutral-200">
+                      {['booked','in_progress'].includes(b.status) && (
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={() => handleCancelBooking(b._id)}
+                          disabled={cancellingBookingIds.has(b._id)}
+                        >
+                          {cancellingBookingIds.has(b._id) ? 'Cancelling...' : 'Cancel'}
+                        </Button>
+                      )}
+
+                      {b.paymentMethod === 'ONLINE' && b.status !== 'refunded' && (
+                        <Button
+                          size="sm"
+                          variant="info"
+                          onClick={() => handleAdminRefund(b._id)}
+                        >
+                          Refund
+                        </Button>
+                      )}
+
+                      {!b.flagged && (
+                        <Button
+                          size="sm"
+                          variant="warning"
+                          onClick={() => handleAdminFlag(b._id)}
+                        >
+                          Flag
+                        </Button>
+                      )}
+
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleToggleUserCOD(b.userId?._id || b.userId)}
+                      >
+                        {(b.userId && b.userId.codRestrictedUntil && new Date(b.userId.codRestrictedUntil) > new Date()) ? 'Allow COD' : 'Restrict COD'}
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDeleteUser(b.userId?._id || b.userId)}
+                        disabled={deletingUserIds.has(b.userId?._id || b.userId)}
+                      >
+                        {deletingUserIds.has(b.userId?._id || b.userId) ? 'Deleting...' : 'Delete User'}
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))
+            )}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-neutral-200">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" onClick={handlePrev} disabled={bookingsPage <= 1}>← Prev</Button>
+              <Button variant="ghost" onClick={handleNext} disabled={bookingsPage >= getTotalPages()}>Next →</Button>
+              <span className="text-body-small text-neutral-600 ml-2">Page</span>
+              <input
+                type="number"
+                min={1}
+                value={bookingsPage}
+                onChange={(e) => handlePageInputChange(e.target.value)}
+                onBlur={handlePageInputBlur}
+                className="w-16 px-2 py-1 border border-neutral-300 rounded text-center"
+              />
+              <span className="text-body-small text-neutral-600">of {getTotalPages()}</span>
+            </div>
+            <span className="text-body-small text-neutral-600">Total: {bookingsTotal}</span>
           </div>
         </div>
       </div>
