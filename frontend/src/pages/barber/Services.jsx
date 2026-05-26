@@ -44,7 +44,7 @@ const Services = () => {
 
         {/* Services Manager Card */}
         <Card shadow="lg">
-          <CardHeader className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-t-xl">
+          <CardHeader className="bg-primary-700 text-white rounded-t-xl">
             <CardTitle>Service Catalog</CardTitle>
           </CardHeader>
           <CardBody>

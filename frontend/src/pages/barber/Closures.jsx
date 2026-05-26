@@ -65,7 +65,7 @@ const Closures = () => {
 
         {/* Add Closure Card */}
         <Card shadow="lg">
-          <CardHeader className="bg-gradient-to-r from-warning-500 to-danger-500 text-white rounded-t-xl">
+          <CardHeader className="bg-warning-700 text-white rounded-t-xl">
             <CardTitle>🚫 Add Shop Closure</CardTitle>
           </CardHeader>
 

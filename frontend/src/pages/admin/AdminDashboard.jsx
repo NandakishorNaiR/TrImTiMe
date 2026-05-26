@@ -453,7 +453,7 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Recent Closures */}
           <Card shadow="lg">
-            <CardHeader className="bg-gradient-to-r from-warning-500 to-danger-500 text-white rounded-t-xl">
+            <CardHeader className="bg-warning-700 text-white rounded-t-xl">
               <CardTitle>Recent Closures ({closuresList.length})</CardTitle>
             </CardHeader>
 
@@ -491,7 +491,7 @@ const AdminDashboard = () => {
 
           {/* Recent Audit Logs */}
           <Card shadow="lg">
-            <CardHeader className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-t-xl">
+            <CardHeader className="bg-primary-700 text-white rounded-t-xl">
               <CardTitle>Recent Activity ({auditLogs.length})</CardTitle>
             </CardHeader>
 
