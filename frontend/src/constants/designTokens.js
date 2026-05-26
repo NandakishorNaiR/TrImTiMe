@@ -1,57 +1,57 @@
 /**
- * DESIGN SYSTEM - TrimTime Barber Booking
- * Complete design tokens extracted from UI mockups
- * Last Updated: May 25, 2026
+ * DESIGN SYSTEM - TrimTime Barber Booking (Pro Edition)
+ * Modern, professional design tokens
+ * Last Updated: May 26, 2026
  */
 
 export const DESIGN_TOKENS = {
     // ============================================
-    // COLORS - Complete Palette
+    // COLORS - Modern Professional Palette
     // ============================================
     colors: {
-        // Primary - Deep Purple (Main brand color)
+        // Primary - Sophisticated Slate/Indigo (Modern brand)
         primary: {
-            50: '#faf5ff',
-            100: '#f3e8ff',
-            200: '#e9d5ff',
-            300: '#d8b4fe',
-            400: '#c084fc',
-            500: '#a855f7', // Primary
-            600: '#9333ea', // Darker shade
-            700: '#7e22ce', // Even darker
-            800: '#6b21a8',
-            900: '#581c87',
+            50: '#f8fafc',
+            100: '#f1f5f9',
+            200: '#e2e8f0',
+            300: '#cbd5e1',
+            400: '#94a3b8',
+            500: '#64748b', // Primary - Slate
+            600: '#475569',
+            700: '#334155',
+            800: '#1e293b',
+            900: '#0f172a',
         },
 
-        // Secondary - Light Purple/Lavender
+        // Secondary - Deep Indigo (Accent)
         secondary: {
-            50: '#fdf8ff',
-            100: '#faf5ff',
-            200: '#f3e8ff',
-            300: '#ede9fe',
-            400: '#ddd6fe',
-            500: '#c4b5fd',
-            600: '#a78bfa',
-            700: '#8b5cf6',
-            800: '#7c3aed',
-            900: '#6d28d9',
+            50: '#eef2ff',
+            100: '#e0e7ff',
+            200: '#c7d2fe',
+            300: '#a5b4fc',
+            400: '#818cf8',
+            500: '#6366f1', // Indigo
+            600: '#4f46e5',
+            700: '#4338ca',
+            800: '#3730a3',
+            900: '#312e81',
         },
 
-        // Accent - Teal/Cyan (Success states, highlights)
+        // Accent - Modern Teal (Highlights)
         accent: {
             50: '#f0fdfa',
             100: '#ccfbf1',
             200: '#99f6e4',
             300: '#5eead4',
             400: '#2dd4bf',
-            500: '#14b8a6', // Accent
+            500: '#14b8a6', // Teal
             600: '#0d9488',
             700: '#0f766e',
             800: '#134e4a',
             900: '#0f2f2e',
         },
 
-        // Success - Green
+        // Success - Modern Green
         success: {
             50: '#f0fdf4',
             100: '#dcfce7',
@@ -65,67 +65,67 @@ export const DESIGN_TOKENS = {
             900: '#145231',
         },
 
-        // Warning - Orange
+        // Warning - Amber
         warning: {
-            50: '#fff7ed',
-            100: '#ffedd5',
-            200: '#fed7aa',
-            300: '#fdba74',
-            400: '#fb923c',
-            500: '#f97316', // Warning
-            600: '#ea580c',
-            700: '#c2410c',
-            800: '#9a3412',
-            900: '#7c2d12',
+            50: '#fffbeb',
+            100: '#fef3c7',
+            200: '#fde68a',
+            300: '#fcd34d',
+            400: '#fbbf24',
+            500: '#f59e0b', // Amber
+            600: '#d97706',
+            700: '#b45309',
+            800: '#92400e',
+            900: '#78350f',
         },
 
-        // Danger - Red
+        // Danger - Rose
         danger: {
-            50: '#fef2f2',
-            100: '#fee2e2',
-            200: '#fecaca',
-            300: '#fca5a5',
-            400: '#f87171',
-            500: '#ef4444', // Danger
-            600: '#dc2626',
-            700: '#b91c1c',
-            800: '#991b1b',
-            900: '#7f1d1d',
+            50: '#fff5f7',
+            100: '#ffe4e6',
+            200: '#fecdd3',
+            300: '#fda4af',
+            400: '#f472b6',
+            500: '#e91e63', // Rose
+            600: '#d81b60',
+            700: '#c2185b',
+            800: '#ad1457',
+            900: '#880e4f',
         },
 
-        // Neutral - Gray
+        // Neutral - Professional Gray
         neutral: {
             50: '#fafafa',
             100: '#f5f5f5',
-            200: '#e5e5e5',
-            300: '#d4d4d4',
-            400: '#a3a3a3',
-            500: '#737373',
-            600: '#525252',
-            700: '#404040',
-            800: '#262626',
-            900: '#171717',
+            200: '#eeeeee',
+            300: '#e0e0e0',
+            400: '#bdbdbd',
+            500: '#9e9e9e',
+            600: '#757575',
+            700: '#616161',
+            800: '#424242',
+            900: '#212121',
         },
 
         // Backgrounds
         background: {
             light: '#ffffff',
-            lighter: '#f9f7ff', // Very light purple tint
-            default: '#fafafa',
+            lighter: '#f8fafc', // Clean slate
+            default: '#f5f7fa',
             dark: '#0f172a',
         },
 
-        // Borders
-        border: '#e5e7eb',
-        borderLight: '#f3f4f6',
+        // Borders & Dividers
+        border: '#e2e8f0',
+        borderLight: '#f1f5f9',
 
         // Text
         text: {
-            primary: '#1f2937',
-            secondary: '#6b7280',
-            tertiary: '#9ca3af',
-            light: '#d1d5db',
-            lighter: '#e5e7eb',
+            primary: '#1e293b',
+            secondary: '#64748b',
+            tertiary: '#94a3b8',
+            light: '#cbd5e1',
+            lighter: '#e2e8f0',
         },
     },
 
@@ -134,9 +134,9 @@ export const DESIGN_TOKENS = {
     // ============================================
     typography: {
         fontFamily: {
-            sans: ['Poppins', 'system-ui', 'sans-serif'],
+            sans: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
             serif: ['Georgia', 'serif'],
-            mono: ['Menlo', 'monospace'],
+            mono: ['Menlo', 'Monaco', 'monospace'],
         },
 
         fontSize: {

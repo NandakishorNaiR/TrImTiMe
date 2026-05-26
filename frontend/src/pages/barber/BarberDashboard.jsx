@@ -57,7 +57,7 @@ const BarberDashboard = () => {
     <Layout>
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
-          <div className="text-4xl animate-spin">⏳</div>
+          <div className="text-neutral-400 text-lg">Loading dashboard…</div>
           <p className="text-body text-neutral-600">Loading dashboard…</p>
         </div>
       </div>
@@ -81,7 +81,7 @@ const BarberDashboard = () => {
               <CardBody className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-label font-semibold text-neutral-600">Bookings Today</p>
-                  <span className="text-2xl">📅</span>
+                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-700 font-bold">D</div>
                 </div>
                 <p className="text-h3 font-bold text-primary-700">{data.todayCount}</p>
               </CardBody>
@@ -92,7 +92,7 @@ const BarberDashboard = () => {
               <CardBody className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-label font-semibold text-neutral-600">Online Earnings</p>
-                  <span className="text-2xl">💳</span>
+                  <div className="w-8 h-8 bg-accent-100 rounded-lg flex items-center justify-center text-accent-700 font-bold">₹</div>
                 </div>
                 <p className="text-h3 font-bold text-accent-700">{formatCurrency(data.onlineTotal)}</p>
               </CardBody>
@@ -103,7 +103,7 @@ const BarberDashboard = () => {
               <CardBody className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-label font-semibold text-neutral-600">COD Pending</p>
-                  <span className="text-2xl">⏳</span>
+                  <div className="w-8 h-8 bg-warning-100 rounded-lg flex items-center justify-center text-warning-700 font-bold">!</div>
                 </div>
                 <p className="text-h3 font-bold text-warning-700">{formatCurrency(data.codPending)}</p>
               </CardBody>

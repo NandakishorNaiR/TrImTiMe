@@ -364,7 +364,7 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-h2 font-bold text-neutral-900">⚙️ Admin Dashboard</h1>
+          <h1 className="text-h2 font-bold text-neutral-900">Admin Dashboard</h1>
           <p className="text-body-small text-neutral-600 mt-1">Manage platform operations, settlements, and compliance</p>
         </div>
 
@@ -516,7 +516,7 @@ const AdminDashboard = () => {
 
         {/* Settlements */}
         <div className="space-y-3">
-          <h2 className="text-h5 font-bold text-neutral-900">💰 Settlements</h2>
+          <h2 className="text-h5 font-bold text-neutral-900">Settlements</h2>
           {loading ? (
             <Card shadow="lg">
               <CardBody className="text-center py-8">
@@ -545,7 +545,7 @@ const AdminDashboard = () => {
 
         {/* Shops & Revenue */}
         <div className="space-y-3">
-          <h2 className="text-h5 font-bold text-neutral-900">🏪 Shops & Revenue</h2>
+          <h2 className="text-h5 font-bold text-neutral-900">Shops & Revenue</h2>
           {shops.length === 0 ? (
             <Card shadow="lg">
               <CardBody className="text-center py-8">
@@ -602,7 +602,7 @@ const AdminDashboard = () => {
         {/* Recent Bookings */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-h5 font-bold text-neutral-900">📅 Bookings</h2>
+            <h2 className="text-h5 font-bold text-neutral-900">Bookings</h2>
             <Button
               variant="secondary"
               size="sm"

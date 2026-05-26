@@ -4,7 +4,6 @@ import { getShops } from "../api/shop.api";
 import ShopCard from "../components/shop/ShopCard";
 import Layout from "../components/Layout";
 import { Input, Button, Card, Badge } from "../components/ui";
-import GlassCard from "../components/ui/GlassCard";
 import { SkeletonGrid } from "../components/ui/Skeleton";
 import GenderPreferenceModal from "../components/auth/GenderPreferenceModal";
 import { useAuth } from "../context/AuthContext";
@@ -107,17 +106,16 @@ const Home = () => {
     <Layout>
       <div className="space-y-8">
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-500 p-8 sm:p-12 md:p-16 shadow-2xl">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-900 via-primary-800 to-secondary-700 p-8 sm:p-12 md:p-16 shadow-2xl">
           <div className="relative z-10">
-            <div className="mb-4 flex items-center gap-2">
-              <span className="text-4xl">✂️</span>
-              <h1 className="text-h2 font-bold text-white">TrimTime</h1>
+            <div className="mb-6 inline-block px-4 py-2 bg-secondary-500/20 rounded-full border border-secondary-400/30">
+              <span className="text-secondary-300 text-sm font-semibold tracking-wider">Professional Salon Management</span>
             </div>
-            <p className="text-4xl sm:text-5xl md:text-display font-bold text-white mb-4 sm:mb-6">
-              Find Your Perfect Salon
-            </p>
+            <h1 className="text-4xl sm:text-5xl md:text-display font-bold text-white mb-4 sm:mb-6">
+              Book Your Perfect Appointment
+            </h1>
             <p className="text-primary-100 text-lg sm:text-xl mb-8 max-w-2xl leading-relaxed">
-              Book appointments at verified salons. Best services, verified professionals, transparent pricing.
+              Discover verified salons with real-time availability. Transparent pricing, professional services, secure payments.
             </p>
             <div className="flex gap-3 flex-wrap">
               <Button 
@@ -126,7 +124,7 @@ const Home = () => {
                 onClick={() => !isAuthenticated && navigate('/login')}
                 className="shadow-lg"
               >
-                {isAuthenticated ? '✓ Start Booking' : 'Get Started'} →
+                {isAuthenticated ? 'Start Booking' : 'Get Started'} →
               </Button>
               <Button 
                 variant="ghost" 
@@ -134,7 +132,7 @@ const Home = () => {
                 className="text-white border-2 border-white hover:bg-white/10"
                 onClick={() => document.querySelector('#shops-section')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Browse Shops ↓
+                Browse Salons ↓
               </Button>
             </div>
           </div>
@@ -147,34 +145,38 @@ const Home = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card shadow="md" hover>
             <div className="text-center">
-              <div className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">{shops.length}+</div>
-              <div className="text-body-small text-neutral-600 mt-2">Active Salons</div>
+              <div className="text-h2 font-bold text-primary-700 mb-2">{shops.length}+</div>
+              <p className="text-body-small text-neutral-600">Verified Salons</p>
             </div>
           </Card>
           <Card shadow="md" hover>
             <div className="text-center">
-              <div className="text-h2 font-bold bg-gradient-to-r from-success-600 to-accent-600 bg-clip-text text-transparent">24/7</div>
-              <div className="text-body-small text-neutral-600 mt-2">Available</div>
+              <div className="text-h2 font-bold text-secondary-600 mb-2">24/7</div>
+              <p className="text-body-small text-neutral-600">Always Available</p>
             </div>
           </Card>
-          <GlassCard className="text-center p-3 sm:p-4 md:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-purple-600">⭐ 4.8</div>
-            <div className="text-gray-600 text-xs sm:text-sm mt-1 sm:mt-2">Avg Rating</div>
-          </GlassCard>
-          <GlassCard className="text-center p-3 sm:p-4 md:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-amber-600">₹99+</div>
-            <div className="text-gray-600 text-xs sm:text-sm mt-1 sm:mt-2">Starting Price</div>
-          </GlassCard>
+          <Card shadow="md" hover>
+            <div className="text-center">
+              <div className="text-h2 font-bold text-accent-600 mb-2">4.8★</div>
+              <p className="text-body-small text-neutral-600">Average Rating</p>
+            </div>
+          </Card>
+          <Card shadow="md" hover>
+            <div className="text-center">
+              <div className="text-h2 font-bold text-success-600 mb-2">₹99+</div>
+              <p className="text-body-small text-neutral-600">Starting From</p>
+            </div>
+          </Card>
         </div>
 
         {/* Search & Filter Section */}
         <div className="space-y-3 sm:space-y-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Discover Salons</h2>
-          <GlassCard variant="subtle" className="p-4 sm:p-5 md:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900">Find Salons Near You</h2>
+          <Card shadow="lg" className="p-4 sm:p-5 md:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div className="sm:col-span-2">
                 <Input 
-                  placeholder="🔍 Search by salon name..." 
+                  placeholder="Search by salon name..." 
                   value={query} 
                   onChange={(e) => setQuery(e.target.value)}
                   className="w-full text-sm"
@@ -183,41 +185,46 @@ const Home = () => {
               <select 
                 value={serviceQuery} 
                 onChange={(e) => setServiceQuery(e.target.value)} 
-                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:border-gray-300 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-neutral-300 bg-white shadow-sm hover:border-neutral-400 transition focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
               >
-                <option value="">📋 All Services</option>
+                <option value="">All Services</option>
                 {servicesList.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <select 
                 value={sortBy} 
                 onChange={(e) => setSortBy(e.target.value)} 
-                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:border-gray-300 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-neutral-300 bg-white shadow-sm hover:border-neutral-400 transition focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
               >
-                <option value="price_asc">💰 Low → High</option>
-                <option value="price_desc">💰 High → Low</option>
-                <option value="name_asc">🔤 A → Z</option>
-                <option value="name_desc">🔤 Z → A</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="name_asc">Name: A to Z</option>
+                <option value="name_desc">Name: Z to A</option>
               </select>
             </div>
-          </GlassCard>
+          </Card>
         </div>
 
         {/* Shops Grid Section */}
         <div id="shops-section" className="space-y-6">
           {withPrice.length === 0 ? (
-            <GlassCard className="p-12 text-center">
-              <p className="text-gray-600 text-lg mb-4">No salons match your search. Try adjusting your filters.</p>
+            <Card shadow="lg" className="p-12 text-center">
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center mx-auto">
+                  <span className="text-neutral-600 text-xl">—</span>
+                </div>
+              </div>
+              <p className="text-neutral-600 text-lg mb-6">No salons match your search criteria.</p>
               <Button variant="secondary" onClick={() => {
                 setQuery("");
                 setServiceQuery("");
               }}>
                 Reset Filters
               </Button>
-            </GlassCard>
+            </Card>
           ) : (
             <div>
-              <p className="text-sm text-gray-600 mb-4">
-                Showing <span className="font-semibold">{withPrice.length}</span> salon{withPrice.length !== 1 ? 's' : ''}
+              <p className="text-sm text-neutral-600 mb-4">
+                Showing <span className="font-semibold text-neutral-900">{withPrice.length}</span> salon{withPrice.length !== 1 ? 's' : ''}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {withPrice.map(({ shop }) => (
@@ -230,49 +237,55 @@ const Home = () => {
 
         {/* CTA Section for unauthenticated users */}
         {!isAuthenticated && (
-          <GlassCard variant="accent" className="p-6 sm:p-8 md:p-12 text-center">
-            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
-              Ready to book your appointment?
+          <Card shadow="lg" className="p-8 sm:p-12 bg-gradient-to-br from-secondary-50 to-primary-50 border border-secondary-200">
+            <h3 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
+              Ready to Book?
             </h3>
-            <p className="text-gray-700 text-sm sm:text-base mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Sign up or log in with your phone number to start booking appointments instantly.
+            <p className="text-neutral-700 text-base sm:text-lg mb-8 max-w-2xl">
+              Create an account and start booking appointments at your preferred salons. Fast, secure, and convenient.
             </p>
-            <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
+            <div className="flex gap-3 flex-wrap">
               <Button 
                 variant="primary" 
-                size="md"
+                size="lg"
                 onClick={() => navigate('/login')}
               >
                 Sign In / Register
               </Button>
               <Button 
                 variant="secondary" 
-                size="md"
+                size="lg"
                 onClick={() => document.querySelector('#shops-section')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Continue Browsing
               </Button>
             </div>
-          </GlassCard>
+          </Card>
         )}
 
         {/* Features Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-          <GlassCard className="p-4 sm:p-6">
-            <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">✓</div>
-            <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Verified Salons</h3>
-            <p className="text-gray-600 text-xs sm:text-sm">All salons are verified and rated by customers.</p>
-          </GlassCard>
-          <GlassCard className="p-4 sm:p-6">
-            <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">⏰</div>
-            <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Instant Booking</h3>
-            <p className="text-gray-600 text-xs sm:text-sm">Book appointments instantly with real-time slot availability.</p>
-          </GlassCard>
-          <GlassCard className="p-4 sm:p-6">
-            <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">💳</div>
-            <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Secure Payments</h3>
-            <p className="text-gray-600 text-xs sm:text-sm">Multiple payment options with secure, encrypted transactions.</p>
-          </GlassCard>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <Card shadow="md" className="p-6 text-center">
+            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-primary-700 font-bold">✓</span>
+            </div>
+            <h3 className="font-semibold text-neutral-900 mb-2">Verified Professionals</h3>
+            <p className="text-neutral-600 text-sm">All salons and barbers are verified and rated by customers.</p>
+          </Card>
+          <Card shadow="md" className="p-6 text-center">
+            <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-secondary-700 font-bold">⏱</span>
+            </div>
+            <h3 className="font-semibold text-neutral-900 mb-2">Real-Time Availability</h3>
+            <p className="text-neutral-600 text-sm">Book appointments instantly with live slot availability.</p>
+          </Card>
+          <Card shadow="md" className="p-6 text-center">
+            <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-accent-700 font-bold">🔒</span>
+            </div>
+            <h3 className="font-semibold text-neutral-900 mb-2">Secure Payments</h3>
+            <p className="text-neutral-600 text-sm">Multiple payment options with secure, encrypted transactions.</p>
+          </Card>
         </div>
       </div>
       
