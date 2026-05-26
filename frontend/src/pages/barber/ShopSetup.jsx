@@ -37,7 +37,7 @@ const ShopSetup = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-accent-50 flex items-center justify-center p-4">
       <Card shadow="2xl" className="w-full max-w-md">
-        <CardHeader className="bg-primary-700 text-white rounded-t-xl">
+        <CardHeader className="bg-primary-700 text-white rounded-t-xl border-b-0 -mx-6 -mt-6 mb-0">
           <CardTitle>Setup Your Shop</CardTitle>
         </CardHeader>
 

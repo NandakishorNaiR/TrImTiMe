@@ -55,7 +55,7 @@ const Settlements = () => {
         ) : (
           <div className="overflow-x-auto">
             <Card shadow="lg">
-              <CardHeader className="bg-primary-700 text-white rounded-t-xl">
+              <CardHeader className="bg-primary-700 text-white rounded-t-xl border-b-0 -mx-6 -mt-6 mb-0">
                 <CardTitle>Settlement Overview</CardTitle>
               </CardHeader>
 

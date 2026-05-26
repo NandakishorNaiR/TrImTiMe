@@ -35,7 +35,7 @@ export const Card = ({
 };
 
 export const CardHeader = ({ children, className = '' }) => (
-  <div className={`mb-4 pb-4 border-b border-neutral-100 ${className}`}>
+  <div className={`px-6 py-4 border-b border-neutral-100 ${className}`}>
     {children}
   </div>
 );
